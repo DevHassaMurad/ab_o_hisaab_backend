@@ -1,0 +1,14 @@
+# Virtual environment & Python cache
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+
+# Large raw / processed data caches (reproducible via src/data/ scripts)
+data/raw/boundaries/pak.zip
+data/raw/nasa_power/
+data/raw/glofas/
+data/processed/*.parquet
+data/processed/splits/*.parquet
+data/interim/*.parquet
+data/interim/districts.geojson

@@ -1,0 +1,45 @@
+{
+  "train": {
+    "years": "2000-2014",
+    "rows": 870560,
+    "positives": 4502,
+    "negatives": 866058,
+    "positive_events": 42,
+    "natural_ratio": 192.4
+  },
+  "val": {
+    "years": "2015-2018",
+    "rows": 232640,
+    "positives": 1408,
+    "negatives": 231232,
+    "positive_events": 16,
+    "natural_ratio": 164.2,
+    "set_99to1": {
+      "rows": 140800,
+      "positives": 1408,
+      "negatives": 139392,
+      "ratio": "99.0:1",
+      "method": "all positives kept; negatives randomly sampled",
+      "positive_events": 16
+    }
+  },
+  "test": {
+    "years": "2019-2023",
+    "rows": 291040,
+    "positives": 21219,
+    "negatives": 269821,
+    "positive_events": 54,
+    "natural_ratio": 12.7,
+    "set_99to1": {
+      "rows": 272500,
+      "positives": 2725,
+      "negatives": 269775,
+      "ratio": "99.0:1",
+      "method": "all negatives kept; positives randomly sampled",
+      "positive_events": 53
+    }
+  },
+  "shared_events_train_test": [],
+  "shared_events_train_val": [],
+  "shared_events_val_test": []
+}
