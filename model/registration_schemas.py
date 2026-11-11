@@ -1,6 +1,7 @@
 """Wire schemas use snake_case; the portal maps its form keys explicitly."""
 
 import re
+from decimal import Decimal
 from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Literal
@@ -110,6 +111,16 @@ class RegistrationRequest(BaseModel):
     designation: Text100 | None = None
     household_size: int | None = Field(default=None, ge=1, le=10000)
     dependents: int | None = Field(default=None, ge=0, le=9999)
+    # Householder composition and monthly income range (PKR); size and dependents are derived from these.
+    adults: int | None = Field(default=None, ge=1, le=100)
+    children: int | None = Field(default=None, ge=0, le=100)
+    males: int | None = Field(default=None, ge=0, le=200)
+    females: int | None = Field(default=None, ge=0, le=200)
+    income_min: Decimal | None = Field(default=None, ge=0, le=Decimal("999999999.99"), max_digits=14, decimal_places=2)
+    income_max: Decimal | None = Field(default=None, ge=0, le=Decimal("999999999.99"), max_digits=14, decimal_places=2)
+    # Shopkeeper monthly revenue range (PKR).
+    revenue_min: Decimal | None = Field(default=None, ge=0, le=Decimal("999999999.99"), max_digits=14, decimal_places=2)
+    revenue_max: Decimal | None = Field(default=None, ge=0, le=Decimal("999999999.99"), max_digits=14, decimal_places=2)
     shop_name: (
         Annotated[
             str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)
@@ -133,6 +144,15 @@ class RegistrationRequest(BaseModel):
                 raise ValueError("Enter a 13-digit CNIC, with or without dashes.")
         elif not re.fullmatch(r"[a-zA-Z0-9 -]{5,20}", self.identity_number):
             raise ValueError("Enter a valid passport number.")
+        if self.user_type == "householder" and self.adults is not None and self.children is not None:
+            self.household_size = self.adults + self.children
+            self.dependents = self.children
+            if (self.males or 0) + (self.females or 0) != self.household_size:
+                raise ValueError("Males plus females must equal adults plus children.")
+        for low, high, label in (("income_min", "income_max", "income"), ("revenue_min", "revenue_max", "revenue")):
+            lo, hi = getattr(self, low), getattr(self, high)
+            if lo is not None and hi is not None and hi < lo:
+                raise ValueError(f"The maximum monthly {label} cannot be below the minimum.")
         fields = ROLE_FIELDS[self.user_type]
         missing = [key for key in fields if getattr(self, key) is None]
         if missing:
@@ -151,8 +171,9 @@ class RegistrationRequest(BaseModel):
 ROLE_FIELDS = {
     "donor": ["donor_type"],
     "ngo": ["organization_name", "registration_number", "designation"],
-    "householder": ["household_size", "dependents"],
-    "shopkeeper": ["shop_name", "business_number", "business_category"],
+    "householder": ["household_size", "dependents", "adults", "children", "males", "females", "income_min",
+                    "income_max"],
+    "shopkeeper": ["shop_name", "business_number", "business_category", "revenue_min", "revenue_max"],
 }
 
 

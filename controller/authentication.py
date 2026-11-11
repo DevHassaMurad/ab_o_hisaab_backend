@@ -65,6 +65,14 @@ class Authentication:
             if not user.email_verified_at:
                 return {"error": "Confirm your email address before signing in.", "code": "EMAIL_NOT_VERIFIED"}, 403
             role = self.db_session.get(Role, user.role_id)
+            if user.registration_status in ("under_review", "corrections_required") and not user.role_id:
+                return {
+                    "error": "Your registration is still being reviewed. You can sign in once PDMA approves your documents."
+                    if user.registration_status == "under_review"
+                    else "Some of your registration documents need correcting before you can sign in.",
+                    "code": "REGISTRATION_UNDER_REVIEW" if user.registration_status == "under_review"
+                    else "REGISTRATION_CORRECTIONS_REQUIRED",
+                }, 403
             if user.role_id == 0 or role is None:
                 return {
                     "error": "Your account is awaiting role assignment. Contact your administrator.",

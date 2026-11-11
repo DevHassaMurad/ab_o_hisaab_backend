@@ -1,7 +1,7 @@
 from fastapi import FastAPI,Depends,APIRouter
 import os
 import uvicorn
-from routes import auth_routes, campaign_routes, forecast_routes, donation_routes, donor_ledger_routes, donor_report_routes, fund_routes, health_routes, ngo_routes, notification_routes
+from routes import auth_routes, beneficiary_routes, campaign_routes, forecast_routes, donation_routes, donor_ledger_routes, donor_report_routes, fund_routes, health_routes, ngo_routes, notification_routes
 from routes import auth_routes, health_routes, registration_routes, document_routes, verification_routes
 from fastapi.middleware.cors import CORSMiddleware
 from config.document_storage import UploadSizeLimit
@@ -92,6 +92,7 @@ api_router.include_router(donor_ledger_routes.router)
 api_router.include_router(ngo_routes.router)
 api_router.include_router(campaign_routes.router)
 api_router.include_router(forecast_routes.router)
+api_router.include_router(beneficiary_routes.router)
 app.include_router(api_router)
 # Keep the existing portal's auth paths compatible with the MySQL backend.
 app.include_router(auth_routes.router, prefix="/api/v1", include_in_schema=False)

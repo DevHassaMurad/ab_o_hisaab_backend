@@ -30,6 +30,16 @@ def enqueue(db: Session, recipient: str, subject: str, text: str, html: str) -> 
     return row
 
 
+def _supports_skip_locked(bind) -> bool:
+    """SKIP LOCKED exists in MySQL 8+ and MariaDB 10.6+ (XAMPP ships MariaDB 10.4). Without it the worker still locks
+    the rows it sends, it just waits for another sender instead of skipping its rows."""
+    d = bind.dialect
+    if d.name != "mysql":
+        return False  # SQLite (tests) ignores FOR UPDATE anyway
+    v = d.server_version_info or ()
+    return v >= (10, 6) if getattr(d, "is_mariadb", False) else v >= (8, 0)
+
+
 def deliver_due(bind, mailer=None, limit=20) -> int:
     """Send every due pending email. Returns how many were sent. Never raises for mail errors."""
     mailer = mailer or AuthMailer()
@@ -40,7 +50,7 @@ def deliver_due(bind, mailer=None, limit=20) -> int:
             .where(EmailOutbox.status == "pending", or_(EmailOutbox.next_attempt_at <= now_utc()))
             .order_by(EmailOutbox.id)
             .limit(limit)
-            .with_for_update(skip_locked=True)
+            .with_for_update(skip_locked=_supports_skip_locked(db.get_bind()))
         ).all()
         for row in rows:
             row.attempts += 1

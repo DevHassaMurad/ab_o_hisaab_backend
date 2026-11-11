@@ -109,6 +109,12 @@ class Registration:
                     },
                 )
             )
+            if approved:
+                from controller.account_activation import activate
+
+                self.db.flush()
+                self.db.refresh(user)
+                activate(self.db, user, data.user_type)
             documents = []
             for process in processes:
                 if process.document_status != "Approved" and process.review_requested_at is None:

@@ -328,6 +328,9 @@ class NgoPortal(NgoBase):
         awaiting_receipt = sum((Decimal(x.amount) for x in transfers if not x.receipt_confirmed_at), ZERO)
         verified = [e for e in exps if e.verification_status == "verified"]
         invested = sum((Decimal(e.amount) for e in verified), ZERO)
+        from controller.beneficiaries import ngo_figures
+
+        ben_paid = ngo_figures(self.db, self.ngo.id)["beneficiary_paid"]
 
         monthly = defaultdict(lambda: {"received": ZERO, "invested": ZERO})
         for x in transfers:
@@ -361,7 +364,8 @@ class NgoPortal(NgoBase):
             "transferred_awaiting_receipt": money(awaiting_receipt),
             "received_amount": money(received),
             "invested_amount": money(invested),
-            "net_balance": money(received - invested),
+            "beneficiary_paid_amount": money(ben_paid),
+            "net_balance": money(received - invested - ben_paid),
             "request_counts": {k: counts.get(k, 0) for k in ("pending", "under_review", "approved", "rejected")},
             "monthly": [{"month": k, "received": money(v["received"]), "invested": money(v["invested"])}
                         for k, v in sorted(monthly.items())],

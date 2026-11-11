@@ -83,4 +83,42 @@ def seed_users(password, bind=None, echo=print):
                 created += 1
                 if not os.environ.get("SEED_NGO_PASSWORD"):
                     echo(f"Demo NGO created: {DEMO_NGO_EMAIL} / {ngo_password} (shown once; store it safely)")
+
+            created += _seed_beneficiaries(session, hasher, echo)
+    return created
+
+
+DEMO_HOUSEHOLDER_EMAIL = "householder@demo.com"
+DEMO_SHOPKEEPER_EMAIL = "shopkeeper@demo.com"
+
+
+def _seed_beneficiaries(session, hasher, echo):
+    """Demo householder and shopkeeper with complete registration profiles (outside production only)."""
+    from datetime import datetime
+
+    from model.registration_model import HouseholderDetails, ShopkeeperDetails
+
+    address = dict(identity_type="cnic", country="PK", state="Punjab", city="Muzaffargarh", postal_code="34200",
+                   address1="Ward 4, Main Bazaar Road", address_confirmed=True, consent_at=datetime.utcnow())
+    created = 0
+    pw = os.environ.get("SEED_HOUSEHOLDER_PASSWORD") or f"{secrets.randbelow(10**12):012d}"
+    u = _create_user(session, hasher, DEMO_HOUSEHOLDER_EMAIL, "Demo Householder", pw, "HOUSEHOLDER")
+    if u:
+        u.registration_status = "approved"
+        session.add(HouseholderDetails(user_id=u.id, phone="+92 300 1234567", identity_number="3210112345671",
+                                       household_size=6, dependents=4, adults=2, children=4, males=3, females=3,
+                                       income_min=15000, income_max=25000, **address))
+        created += 1
+        if not os.environ.get("SEED_HOUSEHOLDER_PASSWORD"):
+            echo(f"Demo householder created: {DEMO_HOUSEHOLDER_EMAIL} / {pw} (shown once; store it safely)")
+    pw = os.environ.get("SEED_SHOPKEEPER_PASSWORD") or f"{secrets.randbelow(10**12):012d}"
+    u = _create_user(session, hasher, DEMO_SHOPKEEPER_EMAIL, "Demo Shopkeeper", pw, "SHOPKEEPER")
+    if u:
+        u.registration_status = "approved"
+        session.add(ShopkeeperDetails(user_id=u.id, phone="+92 301 7654321", identity_number="3210198765431",
+                                      shop_name="Al-Madina General Store", business_number="MZG-SHOP-0042",
+                                      business_category="Grocery", revenue_min=100000, revenue_max=250000, **address))
+        created += 1
+        if not os.environ.get("SEED_SHOPKEEPER_PASSWORD"):
+            echo(f"Demo shopkeeper created: {DEMO_SHOPKEEPER_EMAIL} / {pw} (shown once; store it safely)")
     return created

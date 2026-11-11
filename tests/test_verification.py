@@ -78,11 +78,14 @@ def registration_payload(kind="donor"):
                 "registration_number": "TEST123",
                 "designation": "Director",
             },
-            "householder": {"household_size": 3, "dependents": 1},
+            "householder": {"household_size": 3, "dependents": 1, "adults": 2, "children": 1, "males": 1,
+                            "females": 2, "income_min": "15000", "income_max": "25000"},
             "shopkeeper": {
                 "shop_name": "Test Shop",
                 "business_number": "TAX123",
                 "business_category": "Food",
+                "revenue_min": "50000",
+                "revenue_max": "100000",
             },
         }[kind],
     }

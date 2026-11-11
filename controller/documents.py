@@ -154,6 +154,10 @@ class Documents:
                         else "under_review"
                     )
                 )
+                if owner.registration_status == "approved":
+                    from controller.account_activation import activate
+
+                    activate(self.db, owner, document.user_type)
             self.db.flush()
             response = DocumentResponse.model_validate(document)
             self.db.commit()

@@ -49,7 +49,7 @@ class MigrationTests(unittest.TestCase):
         self.assertIsNone(user["image"])
         self.assertIsNone(user["district_id"])
         self.assertTrue(user["is_active"])
-        self.assertEqual(self.connection.scalar(text("SELECT count(*) FROM roles")), 6)
+        self.assertEqual(self.connection.scalar(text("SELECT count(*) FROM roles")), 8)
         self.assertEqual(inspect(self.connection).get_foreign_keys("users")[0]["referred_table"], "roles")
         self.assertEqual(compare_metadata(MigrationContext.configure(self.connection), Base.metadata), [])
 
@@ -62,6 +62,9 @@ class MigrationTests(unittest.TestCase):
         command.upgrade(self.config, "head")
         self.assertEqual(self.connection.scalar(text("SELECT role_id FROM users WHERE id=7")), 0)
         self.connection.commit()
+        command.downgrade(self.config, "-1")  # 0014 beneficiaries
+        self.assertFalse(inspect(self.connection).has_table("beneficiary_fund_requests"))
+        self.assertNotIn("adults", {c["name"] for c in inspect(self.connection).get_columns("householder_details")})
         command.downgrade(self.config, "0012_forecasting")  # leave the merge point (registration branch stays applied)
         command.downgrade(self.config, "-1")  # 0012 forecasting
         self.assertFalse(inspect(self.connection).has_table("district_risk_assessments"))
@@ -118,14 +121,17 @@ class MigrationTests(unittest.TestCase):
         with patch.dict(os.environ, env):
             os.environ.pop("SEED_DONOR_PASSWORD", None)
             os.environ.pop("SEED_NGO_PASSWORD", None)
-            self.assertEqual(seed_users("admin-test-password", self.connection, echo=shown.append), 3)
+            os.environ.pop("SEED_HOUSEHOLDER_PASSWORD", None)
+            os.environ.pop("SEED_SHOPKEEPER_PASSWORD", None)
+            self.assertEqual(seed_users("admin-test-password", self.connection, echo=shown.append), 5)
             self.assertEqual(seed_users("another-test-password", self.connection, echo=shown.append), 0)
-        self.assertEqual(len(shown), 2)  # donor and NGO passwords are each shown once
+        self.assertEqual(len(shown), 4)  # donor, NGO, householder and shopkeeper passwords are each shown once
         donor_password = shown[0].split(" / ")[1].split()[0]
         self.assertTrue(donor_password.isdigit() and len(donor_password) == 12, donor_password)
         with Session(self.connection) as session:
             users = {u.email: u for u in session.scalars(select(User)).all()}
-            self.assertEqual(set(users), {"admin@pdma.gov.pk", "donor.admin@demo.com", "ngo.admin@demo.com"})
+            self.assertEqual(set(users), {"admin@pdma.gov.pk", "donor.admin@demo.com", "ngo.admin@demo.com",
+                                          "householder@demo.com", "shopkeeper@demo.com"})
             admin, donor = users["admin@pdma.gov.pk"], users["donor.admin@demo.com"]
             self.assertEqual(session.get(Role, admin.role_id).name, "ADMIN")
             self.assertEqual(session.get(Role, donor.role_id).name, "DONOR")
