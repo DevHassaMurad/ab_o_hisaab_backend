@@ -100,16 +100,6 @@ def token(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     return login_response({"email": form.username, "password": form.password}, db)
 
 
-@router.post("/register", status_code=202)
-def register(request: RegisterRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    # Accounts always start unassigned; clients cannot grant themselves a role.
-    data = request.model_dump()
-    data["email"] = str(request.email).lower()
-    Authentication(db).register_user(data)
-    Authentication(db).queue_code(data["email"], "email_confirmation", background_tasks)
-    return {"message": GENERIC_MESSAGE}
-
-
 @router.post("/password-reset/request", status_code=202)
 def request_password_reset(request: EmailRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     return Authentication(db).queue_code(str(request.email), "password_reset", background_tasks)
@@ -162,6 +152,7 @@ def me(user=Depends(auth_middleware), db: Session = Depends(get_db)):
         "district_id": user.district_id,
         "image": user.image,
         "email_verified": bool(user.email_verified_at),
+        "registration_status": user.registration_status,
     }
 
 

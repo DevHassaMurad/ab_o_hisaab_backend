@@ -1,0 +1,47 @@
+{
+  "model": "rf_class_weight",
+  "threshold_from_validation": 0.17166783376890615,
+  "test_rows": 146300,
+  "dropped_rows_missing_features": 0,
+  "test_positives": 1463,
+  "test_negatives": 144837,
+  "test_ratio": "99.0:1",
+  "pr_auc_average_precision": 0.018187708318056037,
+  "pr_auc_trapezoid": 0.018270732228302347,
+  "no_skill_pr_auc_baseline": 0.01,
+  "precision": 0.017981763537262493,
+  "recall": 0.24128503075871496,
+  "f1": 0.033469232957239026,
+  "confusion_matrix": {
+    "TN": 125559,
+    "FP": 19278,
+    "FN": 1110,
+    "TP": 353
+  },
+  "predicted_positive_rate": 0.13418318523581682,
+  "actual_positive_rate": 0.01,
+  "prob_std": 0.18200903401117477,
+  "mean_prob_positives": 0.16005734486611373,
+  "mean_prob_negatives": 0.08301744199981818,
+  "all_negative_predictor": {
+    "accuracy": 0.99,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "events_in_test": 11,
+  "events_detected_at_least_once": 7,
+  "district_events_detected": "79/209",
+  "recall_by_days_to_flood": {
+    "1": 0.23,
+    "2": 0.215,
+    "3": 0.225,
+    "4": 0.196,
+    "5": 0.201,
+    "6": 0.287,
+    "7": 0.335
+  },
+  "pr_auc_by_flood_mode": {
+    "slow": 0.03047581072721038,
+    "flash": 0.011487932623138769
+  }
+}
