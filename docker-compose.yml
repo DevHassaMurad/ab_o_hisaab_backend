@@ -1,20 +1,51 @@
 services:
   db:
-    image: postgis/postgis:16-3.4
+    image: ${POSTGIS_IMAGE:-postgis/postgis:16-3.4}
+    profiles: [postgres]
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: aab
-      POSTGRES_PASSWORD: aab
-      POSTGRES_DB: aab
+      POSTGRES_USER: ${POSTGRES_USER:-aab}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aab_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-aab}
+      POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-aab_test}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aab -d aab"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 5s
       timeout: 5s
       retries: 20
+      start_period: 15s
+
+  # Default database for main.py / artisan.py.
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-aab_auth}
+      MYSQL_USER: ${MYSQL_USER:-aab_auth}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-aab_auth_dev_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-aab_root_dev_password}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql --protocol=TCP -h 127.0.0.1 -u \"$$MYSQL_USER\" -D \"$$MYSQL_DATABASE\" -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  mail:
+    image: ghcr.io/axllent/mailpit:v1.33.1
+    profiles: [mail]
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
 
   # Database for the new API structure (main.py, routes/, controller/, model/).
   # Root password and database name come from .env (DATABASE_PASSWORD, DATABASE_NAME).

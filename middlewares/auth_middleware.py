@@ -44,7 +44,7 @@ class AuthMiddlware:
                     detail="Invalid token"
                 )
             user  = db.get(User, user_id)
-            if user is None:
+            if user is None or not user.is_active or not user.email_verified_at or payload.get("ver", 0) != user.token_version:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="User not found",

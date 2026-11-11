@@ -14,6 +14,7 @@ class JwtHandler:
     def create_token(self, user_id, role=None, district_id=None, name=None, email=None):
         """The portal reads role and district_id from the token to pick the user's pages.
         Every API must still check the role server-side; the token claims are not a permission by themselves."""
+    def create_token(self,user_id, token_version=0):
         expire = datetime.now(timezone.utc) + timedelta(minutes=self.expire_minutes)
         payload = {
             "sub" : str(user_id),
@@ -24,6 +25,7 @@ class JwtHandler:
             "district_id" : district_id,
             "name" : name,
             "email" : email,
+            "ver": token_version,
         }
         token = jwt.encode(
             payload,
@@ -40,6 +42,8 @@ class JwtHandler:
                 algorithms=[self.algorithm],
                 options={"require": ["sub", "exp", "iat"]}
                 )
+            if payload.get("type") != "access":
+                raise InvalidTokenError("Invalid token type")
             return payload
         except ExpiredSignatureError:
             raise ExpiredSignatureError("Token has expired")

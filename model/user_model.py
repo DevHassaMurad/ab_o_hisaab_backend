@@ -1,4 +1,5 @@
-from sqlalchemy import Boolean, ForeignKey, Integer, String, true
+from datetime import datetime
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, true
 from sqlalchemy.orm import Mapped, mapped_column
 from config.database import Base
 from model.role_model import Role
@@ -20,3 +21,8 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default=true(),
     )
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+
+# Register authentication challenge metadata with the existing declarative base.
+from model.auth_challenge_model import AuthChallenge  # noqa: E402,F401
