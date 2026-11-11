@@ -27,6 +27,7 @@ class DonorDonationIn(BaseModel):
     amount: Decimal = Amount
     remarks: str | None = Field(default=None, max_length=500)
     payment_reference: str | None = Field(default=None, max_length=100)
+    payment_method: Literal["BANK_TRANSFER", "CHEQUE", "ONLINE", "CASH", "OTHER"] | None = None
     request_id: int | None = Field(default=None, gt=0)
 
 
@@ -45,11 +46,15 @@ class VerifyIn(BaseModel):
 
 
 class DisbursementIn(BaseModel):
-    source_batch_id: int = Field(gt=0)
+    # Required for direct transfers; omitted for transfers under an approved NGO allocation (paid from reservations).
+    source_batch_id: int | None = Field(default=None, gt=0)
     recipient_type: Literal["ngo", "shopkeeper", "householder"]
     recipient_id: int = Field(gt=0)
     amount: Decimal = Amount
     remarks: str | None = Field(default=None, max_length=500)
+    ngo_request_id: int | None = Field(default=None, gt=0)
+    payment_reference: str | None = Field(default=None, max_length=100)
+    supporting_reference: str | None = Field(default=None, max_length=200)
 
 
 class StatusIn(BaseModel):
@@ -142,8 +147,12 @@ def list_recipients(type: Literal["ngo", "shopkeeper", "householder"],
 
 
 @router.post("/disbursements", status_code=201)
-def create_disbursement(body: DisbursementIn, staff=Depends(require_roles(*PDMA_STAFF)), db: Session = Depends(get_db)):
-    return FundController(db).create_disbursement(staff, body.model_dump())
+def create_disbursement(body: DisbursementIn, background_tasks: BackgroundTasks,
+                        staff=Depends(require_roles(*PDMA_STAFF)), db: Session = Depends(get_db)):
+    row = FundController(db).create_disbursement(staff, body.model_dump())
+    _push_all(background_tasks, row.pop("_notes", []))
+    _send_mail(background_tasks, db)
+    return row
 
 
 @router.get("/disbursements")

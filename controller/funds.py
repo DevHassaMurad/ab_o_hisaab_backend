@@ -110,19 +110,10 @@ class FundController:
 
     # Incoming donor donations (DD-IN) ---------------------------------------------------------------
     def _used(self, donation_ids):
-        if not donation_ids:
-            return {}
-        return {
-            k: Decimal(v)
-            for k, v in self.db.execute(
-                select(DonationDisbursement.source_batch_id, func.coalesce(func.sum(DonationDisbursement.amount), 0))
-                .where(
-                    DonationDisbursement.source_batch_id.in_(donation_ids),
-                    DonationDisbursement.status.in_(COUNTED_DISBURSEMENT),
-                )
-                .group_by(DonationDisbursement.source_batch_id)
-            )
-        }
+        """Money of each contribution no longer available: direct transfers + active NGO-allocation reservations."""
+        from controller.funding import committed_amounts
+
+        return dict(committed_amounts(self.db, donation_ids))
 
     def _donation_row(self, d: DonorDonation, donor: User | None, used=ZERO, request_no=None):
         verified = d.payment_status == "verified"
@@ -171,6 +162,7 @@ class FundController:
             remarks=(data.get("remarks") or "").strip() or None,
             payment_status="pending",
             payment_reference=reference,
+            payment_method=data.get("payment_method"),
         )
         self.db.add(d)
         self.db.flush()
@@ -205,15 +197,9 @@ class FundController:
         if status:
             q = q.where(DonorDonation.payment_status == status)
         if available_only:
-            used = (
-                select(func.coalesce(func.sum(DonationDisbursement.amount), 0))
-                .where(
-                    DonationDisbursement.source_batch_id == DonorDonation.id,
-                    DonationDisbursement.status.in_(COUNTED_DISBURSEMENT),
-                )
-                .scalar_subquery()
-            )
-            q = q.where(DonorDonation.payment_status == "verified", DonorDonation.amount > used)
+            from controller.funding import committed_subquery
+
+            q = q.where(DonorDonation.payment_status == "verified", DonorDonation.amount > committed_subquery())
         if search:
             like = f"%{search.strip()}%"
             q = q.where(or_(DonorDonation.document_no.ilike(like), DonorDonation.remarks.ilike(like),
@@ -341,11 +327,40 @@ class FundController:
             "status_reason": x.status_reason,
             "sent_at": iso(x.sent_at),
             "received_at": iso(x.received_at),
+            "ngo_request_id": x.ngo_request_id,
+            "ngo_request_document_no": self._ngo_request_no(x.ngo_request_id),
+            "ngo_allocation_id": x.ngo_allocation_id,
+            "ngo_allocation_document_no": self._allocation_no(x.ngo_allocation_id),
+            "payment_reference": x.payment_reference,
+            "supporting_reference": x.supporting_reference,
+            "receipt_confirmed_at": iso(x.receipt_confirmed_at),
             "created_at": iso(x.created_at),
         }
 
+    def _allocation_no(self, allocation_id):
+        if not allocation_id:
+            return None
+        from model.fund_model import NgoAllocation
+
+        return self.db.scalar(select(NgoAllocation.document_no).where(NgoAllocation.id == allocation_id))
+
+    def _ngo_request_no(self, request_id):
+        if not request_id:
+            return None
+        from model.fund_model import NgoDonationRequest
+
+        return self.db.scalar(select(NgoDonationRequest.document_no).where(NgoDonationRequest.id == request_id))
+
     def create_disbursement(self, staff: User, data: dict):
         amount = Decimal(str(data["amount"])).quantize(CENT)
+        if data.get("ngo_request_id"):
+            from controller.funding import FundingService
+
+            alloc = FundingService(self.db).allocation_for_request(data["ngo_request_id"])
+            if alloc is not None:
+                return self._create_allocation_transfer(staff, data, amount, alloc)
+        if not data.get("source_batch_id"):
+            raise AuthFlowError("SOURCE_REQUIRED", "Choose a verified incoming donation to send from.", 422)
         # Lock the source donation so concurrent disbursements are checked one after another.
         source = self.db.scalar(
             select(DonorDonation).where(DonorDonation.id == data["source_batch_id"]).with_for_update()
@@ -362,6 +377,9 @@ class FundController:
         except AuthFlowError:
             self.db.rollback()
             raise
+        ngo_request = None
+        if data.get("ngo_request_id"):
+            ngo_request = self._lock_ngo_request_for_transfer(data, amount)
         available = Decimal(source.amount) - self._used([source.id]).get(source.id, ZERO)
         if amount > available:
             self.db.rollback()
@@ -379,10 +397,104 @@ class FundController:
             remarks=(data.get("remarks") or "").strip() or None,
             status="sent",
             sent_at=now,
+            ngo_request_id=ngo_request.id if ngo_request else None,
+            payment_reference=(data.get("payment_reference") or "").strip() or None,
+            supporting_reference=(data.get("supporting_reference") or "").strip() or None,
         )
         self.db.add(x)
+        self.db.flush()
+        notes = self._notify_recipient_of_transfer(x, ngo_request)
         self.db.commit()  # funds count as distributed only once this row is saved
-        return self._disbursement_row(x, source_no=source.document_no)
+        row = self._disbursement_row(x, source_no=source.document_no)
+        row["_notes"] = [(n.user_id, n.to_dict()) for n in notes]
+        return row
+
+
+    def _create_allocation_transfer(self, staff, data, amount, alloc):
+        """Transfer under an approved NGO allocation: paid from its reserved donor funding sources."""
+        from controller.funding import FundingService
+
+        svc = FundingService(self.db)
+        alloc = svc.lock_allocation(alloc.id)
+        try:
+            self.validate_recipient(data["recipient_type"], data["recipient_id"])
+        except AuthFlowError:
+            self.db.rollback()
+            raise
+        ngo_request = self._lock_ngo_request_for_transfer(data, amount)
+        x = DonationDisbursement(
+            document_no=self._doc_no("DD-OUT"), sent_by=staff.id, recipient_type="ngo",
+            recipient_id=data["recipient_id"], source_batch_id=None, ngo_allocation_id=alloc.id,
+            amount=amount, remarks=(data.get("remarks") or "").strip() or None, status="sent", sent_at=now_utc(),
+            ngo_request_id=ngo_request.id,
+            payment_reference=(data.get("payment_reference") or "").strip() or None,
+            supporting_reference=(data.get("supporting_reference") or "").strip() or None,
+        )
+        self.db.add(x)
+        self.db.flush()
+        notes = svc.transfer_for_allocation(staff, alloc, x)
+        notes = [(n.user_id, n.to_dict()) for n in self._notify_recipient_of_transfer(x, ngo_request)] + notes
+        self.db.commit()
+        row = self._disbursement_row(x)
+        row["_notes"] = notes
+        return row
+
+    def _lock_ngo_request_for_transfer(self, data, amount):
+        """A transfer linked to an NGO request must go to that NGO and stay within the approved,
+        not-yet-transferred amount. The request row is locked so parallel transfers cannot exceed it."""
+        from model.fund_model import NgoDonationRequest
+
+        req = self.db.scalar(
+            select(NgoDonationRequest).where(NgoDonationRequest.id == data["ngo_request_id"]).with_for_update()
+            .execution_options(populate_existing=True)
+        )
+        if req is None or data["recipient_type"] != "ngo" or req.ngo_id != data["recipient_id"]:
+            self.db.rollback()
+            raise AuthFlowError("NGO_REQUEST_MISMATCH", "This request does not belong to the selected NGO.", 409)
+        if req.status not in ("approved", "partially_approved"):
+            self.db.rollback()
+            raise AuthFlowError("NGO_REQUEST_NOT_APPROVED", f"{req.document_no} is not approved.", 409)
+        transferred = self.db.scalar(
+            select(func.coalesce(func.sum(DonationDisbursement.amount), 0)).where(
+                DonationDisbursement.ngo_request_id == req.id,
+                DonationDisbursement.status.in_(COUNTED_DISBURSEMENT),
+            )
+        ) or 0
+        remaining = Decimal(req.approved_amount) - Decimal(transferred)
+        if amount > remaining:
+            self.db.rollback()
+            raise AuthFlowError(
+                "EXCEEDS_APPROVED_AMOUNT",
+                f"Only PKR {remaining:,.2f} of the approved amount for {req.document_no} is left to transfer.",
+                409,
+            )
+        return req
+
+    def _notify_recipient_of_transfer(self, x, ngo_request):
+        """Tell an NGO (when it has a portal login) that funds were transferred: stored, emailed, pushed."""
+        if x.recipient_type != "ngo":
+            return []  # shopkeeper / householder accounts belong to the beneficiary register
+        ngo = self.db.get(Ngo, x.recipient_id)
+        if ngo is None or not ngo.user_id:
+            return []
+        user = self.db.get(User, ngo.user_id)
+        title = f"Funds transferred: {x.document_no}"
+        message = f"PKR {Decimal(x.amount):,.2f} sent" + (f" for {ngo_request.document_no}" if ngo_request else "") + \
+            ". Please acknowledge receipt."
+        notes = self._notify([ngo.user_id], "ngo_transfer", title, message, x.id, "ngo_allocation")
+        if user and user.email:
+            rows = [("Allocation reference", x.document_no), ("Transferred amount", f"PKR {Decimal(x.amount):,.2f}"),
+                    ("Transfer date", (x.sent_at or now_utc()).strftime("%d %b %Y")),
+                    ("Payment reference", x.payment_reference or "—")]
+            if ngo_request:
+                rows[1:1] = [("Original request", ngo_request.document_no),
+                             ("Approved amount", f"PKR {Decimal(ngo_request.approved_amount):,.2f}")]
+            enqueue(self.db, user.email, *render_notice(
+                "Funds transferred to your organisation", "NGO FUNDING", ngo.name,
+                "PDMA has transferred funds to your organisation. Please confirm receipt in the NGO portal.",
+                rows, "/ngo/funds", "Acknowledge receipt",
+            ))
+        return notes
 
     def list_disbursements(self, status=None, recipient_type=None, search=None, date_from=None, date_to=None,
                            page=1, page_size=20):
@@ -421,6 +533,11 @@ class FundController:
             self.db.rollback()
             raise AuthFlowError("INVALID_TRANSITION", f"A {x.status} distribution cannot be marked {status}.", 409)
         x.status = status
+        if status == "rejected" and x.ngo_allocation_id:
+            from controller.funding import FundingService
+
+            # Failed transfer under an allocation: its amount returns to the reserved funding sources.
+            FundingService(self.db).void_transfer(staff, x)
         if status == "received":
             x.received_at = now_utc()
         if status == "sent":

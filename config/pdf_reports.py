@@ -105,6 +105,8 @@ def _summary(s):
         ("Total donated", pkr(s["total_donated"])),
         ("Total verified donations", pkr(s["total_verified"])),
         ("Total allocated", pkr(s["total_allocated"])),
+        ("Reserved for NGO allocations (not yet sent)", pkr(s.get("total_reserved", "0"))),
+        ("Actually disbursed", pkr(s.get("total_disbursed", "0"))),
         ("Total spent", pkr(s["total_spent"]) if s.get("spent_available") else NOT_AVAILABLE),
         ("Remaining (unallocated) balance", pkr(s["remaining_balance"])),
     ]
@@ -134,6 +136,22 @@ def _build(story, title):
     return buf.getvalue()
 
 
+def _utilization(story, report):
+    """'Utilization of your donations': each actual disbursement traced to the contribution and batch it came from."""
+    story.append(Paragraph("Utilization of your donations", H2))
+    rows = [u for u in report.get("utilization", []) if Decimal(u["disbursed_amount"]) > 0]
+    if not rows:
+        story.append(Paragraph("No money from these contributions has been disbursed yet.", BODY))
+        return
+    story.append(_table(
+        ["NGO / recipient", "Request", "Allocation", "Batch", "Contribution", "Allocated", "Disbursed", "Date"],
+        [[u["ngo_name"] or u["recipient_type"], u["ngo_request_no"] or "—", u["allocation_document_no"], u["batch_no"],
+          u["contribution_document_no"], pkr(u["allocated_amount"]), pkr(u["disbursed_amount"]),
+          (u["disbursement_date"] or "")[:10] or "—"] for u in rows],
+        [27 * mm, 24 * mm, 24 * mm, 24 * mm, 24 * mm, 20 * mm, 20 * mm, 17 * mm], numeric_cols=(5, 6),
+    ))
+
+
 def spent_cell(v):
     return pkr(v) if v is not None else NOT_AVAILABLE
 
@@ -147,6 +165,7 @@ def daily_pdf(report, reference, generated_utc):
           pkr(r["allocated_amount"]), spent_cell(r["spent_amount"]), pkr(r["remaining_balance"])] for r in report["items"]],
         [18 * mm, 27 * mm, 27 * mm, 23 * mm, 17 * mm, 22 * mm, 22 * mm, 24 * mm], numeric_cols=(3, 5, 6, 7),
     )]
+    _utilization(story, report)
     return _build(story, "Daily donation report")
 
 
@@ -165,6 +184,7 @@ def monthly_pdf(report, reference, generated_utc):
                  pkr(b["allocated"]), spent_cell(b["spent"]), pkr(b["remaining"])] for b in report["batches"]],
                [27 * mm, 18 * mm, 13 * mm, 23 * mm, 23 * mm, 23 * mm, 23 * mm, 23 * mm], numeric_cols=(2, 3, 4, 5, 6, 7)),
     ]
+    _utilization(story, report)
     return _build(story, "Monthly donation report")
 
 
@@ -199,4 +219,84 @@ def batch_pdf(report, reference, generated_utc):
                             [27 * mm, 20 * mm, 50 * mm, 27 * mm, 34 * mm, 22 * mm], numeric_cols=(3,)))
     else:
         story.append(Paragraph(f"{NOT_AVAILABLE}. NGOs have not reported expenditure against this batch.", BODY))
+    _utilization(story, report)
     return _build(story, f"Batch report {report['batch_no']}")
+
+
+def ngo_monthly_pdf(report, reference, generated_utc):
+    """NGO monthly statement: requests, transfers received and verified expenditure for the NGO's own records."""
+    story = []
+    generated = (datetime.fromisoformat(generated_utc) + timedelta(hours=5)).strftime("%d %b %Y %H:%M PKT")
+    s = report["summary"]
+    story += [
+        Paragraph("NGO monthly statement", H1),
+        Spacer(1, 3 * mm),
+        _key_values([("Organisation", report["ngo"]), ("Reporting period", report["period"]["label"]),
+                     ("Report reference", reference), ("Generated", generated)]),
+        Paragraph("Financial summary", H2),
+        _key_values([("Requested", pkr(s["requested"])), ("Approved", pkr(s["approved"])),
+                     ("Transferred", pkr(s["transferred"])), ("Received (confirmed)", pkr(s["received"])),
+                     ("Invested (verified)", pkr(s["invested"])), ("Net balance", pkr(s["net"]))]),
+        Paragraph("Funding requests", H2),
+        _table(["Reference", "Subject", "Requested", "Approved", "Status"],
+               [[r["document_no"], r["subject"], pkr(r["requested_amount"]),
+                 pkr(r["approved_amount"]) if r["approved_amount"] else "—", status_label(r["progress_status"])]
+                for r in report["requests"]], [32 * mm, 58 * mm, 30 * mm, 30 * mm, 30 * mm], numeric_cols=(2, 3)),
+        Paragraph("Transfers", H2),
+        _table(["Allocation", "Date", "Amount", "Payment ref", "Receipt"],
+               [[t["allocation_reference"], (t["transfer_date"] or "")[:10], pkr(t["transferred_amount"]),
+                 t["payment_reference"] or "—", "Confirmed" if t["receipt_confirmed_at"] else "Awaiting"]
+                for t in report["transfers"]], [34 * mm, 26 * mm, 34 * mm, 46 * mm, 40 * mm], numeric_cols=(2,)),
+        Paragraph("Expenditure", H2),
+        _table(["Reference", "Date", "Category", "Description", "Amount", "Verification"],
+               [[e["reference"], e["expense_date"], status_label(e["category"]), e["description"], pkr(e["amount"]),
+                 status_label(e["verification_status"])] for e in report["expenditures"]],
+               [28 * mm, 20 * mm, 28 * mm, 50 * mm, 27 * mm, 27 * mm], numeric_cols=(4,)),
+    ]
+    return _build(story, "NGO monthly statement")
+
+
+
+VOUCHER_STATUS = {
+    "verified": ("CONFIRMED", colors.HexColor("#1FA34A"),
+                 "PDMA has received and verified this donation. Thank you for supporting flood relief through "
+                 "Aab o Hisaab. Every rupee is tracked from this receipt to the NGO that receives it."),
+    "pending": ("PENDING VERIFICATION", colors.HexColor("#B7791F"),
+                "This payment has been recorded but has NOT yet been verified by PDMA. This document is an "
+                "acknowledgement of submission, not a confirmed donation receipt."),
+    "rejected": ("REJECTED", colors.HexColor("#D93636"),
+                 "PDMA could not verify this payment, so it has NOT been accepted as a donation. This document "
+                 "records the outcome and is not a donation receipt."),
+}
+
+
+def receipt_voucher_pdf(v, generated_utc):
+    """A4 DONATION RECEIPT VOUCHER for one donor donation, built only from database values (see DonorLedger.voucher_data)."""
+    label, colour, message = VOUCHER_STATUS[v["payment_status"]]
+    generated = (datetime.fromisoformat(generated_utc) + timedelta(hours=5)).strftime("%d %b %Y %H:%M:%S PKT")
+    verified_on = ((datetime.fromisoformat(v["verification_date"]) + timedelta(hours=5)).strftime("%d %b %Y")
+                   if v["verification_date"] and v["payment_status"] != "pending" else "—")
+    status_style = ParagraphStyle("status", parent=BODY, fontName="Helvetica-Bold", fontSize=11, textColor=colour)
+    amount_style = ParagraphStyle("amt", parent=H1, fontSize=20, textColor=INK)
+    head = Table([[Paragraph("DONATION RECEIPT VOUCHER", H1), Paragraph(label, status_style)]],
+                 colWidths=[120 * mm, 60 * mm])
+    head.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+                              ("LINEBELOW", (0, 0), (-1, 0), 1.2, BRAND), ("BOTTOMPADDING", (0, 0), (-1, -1), 8)]))
+    pairs = [
+        ("Receipt number", v["receipt_no"]), ("Donation reference", v["document_no"]),
+        ("Donation batch", v["batch_no"]), ("Donor name", v["donor"]), ("Donation date", v["date"]),
+        ("Payment method", v["payment_method"] or "Not provided"),
+        ("Payment reference", v["payment_reference"] or "Not provided"),
+        ("Verification status", label.title()), ("Verification date", verified_on),
+    ]
+    if v.get("rejection_reason"):
+        pairs.append(("Reason", v["rejection_reason"]))
+    story = [
+        head, Spacer(1, 6 * mm),
+        Paragraph("Amount", SMALL), Paragraph(pkr(v["amount"]), amount_style), Spacer(1, 4 * mm),
+        _key_values(pairs, widths=(55 * mm, 125 * mm)), Spacer(1, 6 * mm),
+        Paragraph(message, BODY), Spacer(1, 10 * mm),
+        Paragraph(f"System-generated on {generated} by Aab o Hisaab AI. This voucher is valid without a signature; "
+                  f"verify it with receipt number {v['receipt_no']}.", SMALL),
+    ]
+    return _build(story, f"Donation receipt {v['receipt_no']}")

@@ -26,6 +26,12 @@ def summary(donor=Depends(only_donor), db: Session = Depends(get_db)):
     return DonorReports(db, donor).summary()
 
 
+@router.get("/utilization")
+def utilization(donor=Depends(only_donor), db: Session = Depends(get_db)):
+    """'Where your money went': each allocation / transfer funded by this donor's contributions (own share only)."""
+    return DonorReports(db, donor).utilization()
+
+
 @router.get("/daily")
 def daily(day: date = Query(alias="date"), donor=Depends(only_donor), db: Session = Depends(get_db)):
     return DonorReports(db, donor).daily(day)

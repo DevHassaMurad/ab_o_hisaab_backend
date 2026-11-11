@@ -49,7 +49,7 @@ class MigrationTests(unittest.TestCase):
         self.assertIsNone(user["image"])
         self.assertIsNone(user["district_id"])
         self.assertTrue(user["is_active"])
-        self.assertEqual(self.connection.scalar(text("SELECT count(*) FROM roles")), 5)
+        self.assertEqual(self.connection.scalar(text("SELECT count(*) FROM roles")), 6)
         self.assertEqual(inspect(self.connection).get_foreign_keys("users")[0]["referred_table"], "roles")
         self.assertEqual(compare_metadata(MigrationContext.configure(self.connection), Base.metadata), [])
 
@@ -62,6 +62,17 @@ class MigrationTests(unittest.TestCase):
         command.upgrade(self.config, "head")
         self.assertEqual(self.connection.scalar(text("SELECT role_id FROM users WHERE id=7")), 0)
         self.connection.commit()
+        command.downgrade(self.config, "-1")  # 0011 campaigns
+        for table in ("donation_campaigns", "campaign_contributions", "campaign_documents", "campaign_events",
+                      "campaign_notices"):
+            self.assertFalse(inspect(self.connection).has_table(table))
+        command.downgrade(self.config, "-1")  # 0010 donor ledger
+        self.assertNotIn("receipt_no", {c["name"] for c in inspect(self.connection).get_columns("donor_donations")})
+        command.downgrade(self.config, "-1")  # 0009 fund traceability
+        for table in ("ngo_allocations", "allocation_funding_sources", "funding_disbursements", "fund_ledger_events"):
+            self.assertFalse(inspect(self.connection).has_table(table))
+        command.downgrade(self.config, "-1")  # 0008 NGO portal
+        self.assertFalse(inspect(self.connection).has_table("ngo_donation_requests"))
         command.downgrade(self.config, "-1")  # 0007 NGO expenditures
         self.assertFalse(inspect(self.connection).has_table("ngo_expenditures"))
         command.downgrade(self.config, "-1")  # 0006 PDMA fund ledger
@@ -96,14 +107,15 @@ class MigrationTests(unittest.TestCase):
         shown = []
         with patch.dict(os.environ, env):
             os.environ.pop("SEED_DONOR_PASSWORD", None)
-            self.assertEqual(seed_users("admin-test-password", self.connection, echo=shown.append), 2)
+            os.environ.pop("SEED_NGO_PASSWORD", None)
+            self.assertEqual(seed_users("admin-test-password", self.connection, echo=shown.append), 3)
             self.assertEqual(seed_users("another-test-password", self.connection, echo=shown.append), 0)
-        self.assertEqual(len(shown), 1)  # the donor password is shown once
+        self.assertEqual(len(shown), 2)  # donor and NGO passwords are each shown once
         donor_password = shown[0].split(" / ")[1].split()[0]
         self.assertTrue(donor_password.isdigit() and len(donor_password) == 12, donor_password)
         with Session(self.connection) as session:
             users = {u.email: u for u in session.scalars(select(User)).all()}
-            self.assertEqual(set(users), {"admin@pdma.gov.pk", "donor.admin@demo.com"})
+            self.assertEqual(set(users), {"admin@pdma.gov.pk", "donor.admin@demo.com", "ngo.admin@demo.com"})
             admin, donor = users["admin@pdma.gov.pk"], users["donor.admin@demo.com"]
             self.assertEqual(session.get(Role, admin.role_id).name, "ADMIN")
             self.assertEqual(session.get(Role, donor.role_id).name, "DONOR")

@@ -5,9 +5,10 @@
    SEED_ADMIN_NAME      default "PDMA Admin"
    SEED_USER_PASSWORD   required, 12+ characters (artisan asks for it if not set)
 
-2. Demo donor (development only; skipped when APP_ENV=production)
-   donor.admin@demo.com with a random 12-digit numeric password, printed once when the account is created.
-   Set SEED_DONOR_PASSWORD to choose the password instead. The password is never written to a file.
+2. Demo donor and demo NGO (development only; skipped when APP_ENV=production)
+   donor.admin@demo.com and ngo.admin@demo.com, each with a random 12-digit numeric password printed once
+   when the account is created. Set SEED_DONOR_PASSWORD / SEED_NGO_PASSWORD to choose them instead.
+   Passwords are never written to a file. The NGO login is linked to the "Demo Relief NGO" organisation.
 """
 import os
 import secrets
@@ -17,11 +18,12 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from config.database import engine
-from model.donation_model import DonorProfile
+from model.donation_model import DonorProfile, Ngo
 from model.role_model import Role
 from model.user_model import User
 
 DEMO_DONOR_EMAIL = "donor.admin@demo.com"
+DEMO_NGO_EMAIL = "ngo.admin@demo.com"
 
 
 def _create_user(session, hasher, email, name, password, role_name):
@@ -67,4 +69,18 @@ def seed_users(password, bind=None, echo=print):
                 created += 1
                 if not os.environ.get("SEED_DONOR_PASSWORD"):
                     echo(f"Demo donor created: {DEMO_DONOR_EMAIL} / {donor_password} (shown once; store it safely)")
+
+            ngo_password = os.environ.get("SEED_NGO_PASSWORD") or f"{secrets.randbelow(10**12):012d}"
+            if len(ngo_password) < 12:
+                raise ValueError("SEED_NGO_PASSWORD must contain at least 12 characters.")
+            ngo_user = _create_user(session, hasher, DEMO_NGO_EMAIL, "Demo NGO Admin", ngo_password, "NGO")
+            if ngo_user:
+                org = session.scalar(select(Ngo).where(Ngo.name == "Demo Relief NGO"))
+                if org is None:
+                    org = Ngo(name="Demo Relief NGO", registration_no="NGO-DEMO-001", contact_email=DEMO_NGO_EMAIL)
+                    session.add(org)
+                org.user_id = ngo_user.id
+                created += 1
+                if not os.environ.get("SEED_NGO_PASSWORD"):
+                    echo(f"Demo NGO created: {DEMO_NGO_EMAIL} / {ngo_password} (shown once; store it safely)")
     return created

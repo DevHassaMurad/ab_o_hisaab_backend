@@ -23,6 +23,7 @@ from model.user_model import User
 ROOT = Path(__file__).resolve().parents[1]
 ADMIN = ("admin@pdma.gov.pk", "admin-test-password")
 DONOR = ("donor.admin@demo.com", "123456789012")
+NGO = ("ngo.admin@demo.com", "210987654321")
 
 
 class DonationFixture:
@@ -41,7 +42,8 @@ class DonationFixture:
         with cls.engine.begin() as connection:
             config.attributes["connection"] = connection
             command.upgrade(config, "head")
-        with patch.dict(os.environ, {"SEED_DONOR_PASSWORD": DONOR[1], "APP_ENV": "development"}):
+        with patch.dict(os.environ, {"SEED_DONOR_PASSWORD": DONOR[1], "SEED_NGO_PASSWORD": NGO[1],
+                                     "APP_ENV": "development"}):
             seed_users(ADMIN[1], cls.engine, echo=lambda *_: None)
         cls.Session = sessionmaker(bind=cls.engine)
 
@@ -80,10 +82,12 @@ class DonationFixture:
         cls.mail_patch.stop()
         cls.app.dependency_overrides.clear()
         cls.engine.dispose()
-        cls.tmp.cleanup()
+        cls.tmp.cleanup() if hasattr(cls.tmp, "cleanup") else None
 
     @classmethod
     def login(cls, email, password):
+        from routes.auth_routes import _buckets
+        _buckets.clear()  # each test class logs in several users; the IP burst limit is tested elsewhere
         r = cls.client.post("/api/auth/authenticate", json={"email": email, "password": password})
         assert r.status_code == 200, r.text
         return {"Authorization": f"Bearer {r.json()['access_token']}"}

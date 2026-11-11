@@ -150,7 +150,7 @@ def logout(user=Depends(auth_middleware), db: Session = Depends(get_db)):
 @router.get("/me")
 def me(user=Depends(auth_middleware), db: Session = Depends(get_db)):
     role = db.scalar(select(Role.name).where(Role.id == user.role_id))
-    if role not in {"ADMIN", "DC", "DONOR", "PDMA_OFFICER"}:
+    if role not in {"ADMIN", "DC", "DONOR", "NGO", "PDMA_OFFICER"}:
         raise AuthFlowError(
             "ROLE_UNASSIGNED", "Your account is awaiting role assignment. Contact your administrator.", 403
         )
