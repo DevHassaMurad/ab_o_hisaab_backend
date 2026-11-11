@@ -1,0 +1,423 @@
+{
+  "challenge": "C12 \u2014 Multimodal Consistency Cross-Check (Data Verification)",
+  "architecture": {
+    "modality_1": "Structured Numerical Data (Primary API Ingestion \u2014 NASA POWER / GEE Water Feed)",
+    "modality_2": "Independent Satellite Reference Data (UN FAO EVE / Copernicus Sentinel-1 SAR + GPM IMERG Reference)",
+    "modality_3": "Unstructured Textual Claims (PDMA / NDMA / District Situation Reports + NLP Claim Extractor)"
+  },
+  "scenarios": [
+    {
+      "record_id": "REC-2024-DADU-01",
+      "district_name": "Dadu",
+      "province": "Sindh",
+      "date": "2024-08-05",
+      "disaster_type": "Slow-Onset Riverine & Monsoon Flood",
+      "modality_1_structured_api_data": {
+        "record_id": "REC-2024-DADU-01",
+        "district_name": "Dadu",
+        "province": "Sindh",
+        "observation_date": "2024-08-05",
+        "disaster_type": "Slow-Onset Riverine & Monsoon Flood",
+        "api_provider": "NASA POWER API (MERRA-2 0.5 deg) + GEE Inundation Feed",
+        "geographical_coverage": "ADM2 PK204 (Dadu District, 8,017.5 km2)",
+        "measurement_window": "Rolling 7-Day (2024-07-30 to 2024-08-05)",
+        "api_rain_7d_mm": 343.24,
+        "api_rain_30d_mm": 360.44,
+        "api_soil_moisture": 0.765,
+        "api_temp_c": 33.5,
+        "api_inundation_pct": 15.0,
+        "pending_tier_request": "Action"
+      },
+      "modality_2_independent_satellite_reference": {
+        "district_name": "Dadu",
+        "province": "Sindh",
+        "reference_source_radar": "UN FAO EVE / Copernicus Sentinel-1 SAR (10m Radar)",
+        "reference_source_precip": "GPM IMERG v07 / Ground Synoptic Reference",
+        "observation_period_start": "2024-08-16",
+        "observation_period_end": "2024-08-31",
+        "geographical_coverage": "ADM2 PK204 (Dadu District)",
+        "sentinel1_flooded_sq_km": 1380.67,
+        "sentinel1_inundation_pct": 15.3,
+        "sentinel1_pop_exposed": 498584,
+        "ref_rain_7d_mm": 335.0,
+        "ref_rain_30d_mm": 355.0,
+        "ref_soil_saturation_ratio_q99": 1.02
+      },
+      "modality_3_unstructured_text_report": {
+        "source_agency": "PDMA Sindh Monsoon Situation Bulletin",
+        "report_date": "2024-08-05",
+        "geographical_coverage": "Dadu District (Johi, KN Shah, Mehar Tehsils)",
+        "raw_text": "Heavy monsoon spell recorded 340 mm of rainfall over 7 days in Dadu district. Hill torrent inflows and embankment overflow have submerged low-lying union councils with approximately 15% inundated area; emergency evacuation underway.",
+        "nlp_extracted_claims": {
+          "extracted_rainfall_mm": 340.0,
+          "extracted_rainfall_window": "7d",
+          "extracted_inundation_pct": 15.0,
+          "narrative_flood_state": "ACTIVE_FLOOD_REPORTED",
+          "severity_keywords_found": [
+            "submerged",
+            "inundated",
+            "evacuation",
+            "overflow",
+            "embankment",
+            "emergency"
+          ],
+          "normalcy_keywords_found": []
+        }
+      },
+      "pairwise_checks": {
+        "api_vs_satellite": {
+          "verdict": "CONSISTENT",
+          "explanation": "Primary API 7d rainfall (343.2 mm) and flood extent (15.0%) align with independent reference (335.0 mm rain; Sentinel-1 SAR = 15.30%)."
+        },
+        "text_vs_satellite": {
+          "verdict": "CONSISTENT",
+          "explanation": "Written report (ACTIVE_FLOOD_REPORTED) aligns with independent Sentinel-1 SAR (15.30% flooded area)."
+        },
+        "api_vs_text": {
+          "verdict": "CONSISTENT",
+          "explanation": "Structured API telemetry and extracted text claims are consistent."
+        }
+      },
+      "verification_result": {
+        "overall_verdict": "CONSISTENT",
+        "human_review_status": "VERIFIED_CONSISTENT \u2014 All 3 Modalities Aligned"
+      },
+      "funding_tier_evaluation": {
+        "requested_tier": "Action",
+        "verified_supported_tier": "Action",
+        "supporting_rf_flood_prob": 0.2693,
+        "supporting_rf_risk_score": 26.9,
+        "supporting_rf_tier": "Normal",
+        "tier_approved": true
+      }
+    },
+    {
+      "record_id": "REC-2025-DADU-02",
+      "district_name": "Dadu",
+      "province": "Sindh",
+      "date": "2025-05-15",
+      "disaster_type": "Riverine Flood",
+      "modality_1_structured_api_data": {
+        "record_id": "REC-2025-DADU-02",
+        "district_name": "Dadu",
+        "province": "Sindh",
+        "observation_date": "2025-05-15",
+        "disaster_type": "Riverine Flood",
+        "api_provider": "Primary Weather & Surface Water API (Faulty Ingestion Spike)",
+        "geographical_coverage": "ADM2 PK204 (Dadu District)",
+        "measurement_window": "Rolling 7-Day (2025-05-09 to 2025-05-15)",
+        "api_rain_7d_mm": 320.0,
+        "api_rain_30d_mm": 322.0,
+        "api_soil_moisture": 0.11,
+        "api_temp_c": 46.8,
+        "api_inundation_pct": 18.0,
+        "pending_tier_request": "Action"
+      },
+      "modality_2_independent_satellite_reference": {
+        "district_name": "Dadu",
+        "province": "Sindh",
+        "reference_source_radar": "UN FAO EVE / Copernicus Sentinel-1 SAR (10m Radar)",
+        "reference_source_precip": "Independent Satellite Gauge Reference (MERRA-2 / IMERG)",
+        "observation_period_start": "2025-05-01",
+        "observation_period_end": "2025-05-15",
+        "geographical_coverage": "ADM2 PK204 (Dadu District)",
+        "sentinel1_flooded_sq_km": 29.97,
+        "sentinel1_inundation_pct": 0.33,
+        "sentinel1_pop_exposed": 2832,
+        "ref_rain_7d_mm": 0.23,
+        "ref_rain_30d_mm": 2.48,
+        "ref_soil_saturation_ratio_q99": 0.147
+      },
+      "modality_3_unstructured_text_report": {
+        "source_agency": "PDMA Sindh Daily Situation Report",
+        "report_date": "2025-05-15",
+        "geographical_coverage": "Dadu District",
+        "raw_text": "Normal weather conditions prevail in Dadu with 0.2 mm rainfall and clear skies. Indus river shows normal flow within banks and no significant flooding reported.",
+        "nlp_extracted_claims": {
+          "extracted_rainfall_mm": 0.2,
+          "extracted_rainfall_window": "7d",
+          "extracted_inundation_pct": 0.0,
+          "narrative_flood_state": "NO_FLOOD_REPORTED",
+          "severity_keywords_found": [],
+          "normalcy_keywords_found": [
+            "clear skies",
+            "no significant flooding",
+            "normal flow",
+            "normal weather",
+            "within banks"
+          ]
+        }
+      },
+      "pairwise_checks": {
+        "api_vs_satellite": {
+          "verdict": "CONTRADICTION",
+          "explanation": "Primary API telemetry (320.0 mm rain, 18.0% flood) contradicts independent satellite reference (0.2 mm rain, Sentinel-1 = 0.33%)."
+        },
+        "text_vs_satellite": {
+          "verdict": "CONSISTENT",
+          "explanation": "Written report (NO_FLOOD_REPORTED) aligns with independent Sentinel-1 SAR (0.33% flooded area)."
+        },
+        "api_vs_text": {
+          "verdict": "CONTRADICTION",
+          "explanation": "API 7d rainfall (320.0 mm) contradicts written report (0.2 mm). API flood extent (18.0%) contradicts written report (0.0%)."
+        }
+      },
+      "verification_result": {
+        "overall_verdict": "CONTRADICTION_DETECTED",
+        "human_review_status": "HUMAN_REVIEW_REQUIRED \u2014 Hold Automated Trigger & Investigate Source Conflict"
+      },
+      "funding_tier_evaluation": {
+        "requested_tier": "Action",
+        "verified_supported_tier": "Normal",
+        "supporting_rf_flood_prob": 0.0,
+        "supporting_rf_risk_score": 0.0,
+        "supporting_rf_tier": "Normal",
+        "tier_approved": false
+      }
+    },
+    {
+      "record_id": "REC-2024-SUJAWAL-03",
+      "district_name": "Sujawal",
+      "province": "Sindh",
+      "date": "2024-09-20",
+      "disaster_type": "Slow Coastal / Riverine Flood",
+      "modality_1_structured_api_data": {
+        "record_id": "REC-2024-SUJAWAL-03",
+        "district_name": "Sujawal",
+        "province": "Sindh",
+        "observation_date": "2024-09-20",
+        "disaster_type": "Slow Coastal / Riverine Flood",
+        "api_provider": "NASA POWER API (MERRA-2 0.5 deg) + GEE Inundation Feed",
+        "geographical_coverage": "ADM2 PK226 (Sujawal District, 8,687.5 km2)",
+        "measurement_window": "Rolling 7-Day (2024-09-14 to 2024-09-20)",
+        "api_rain_7d_mm": 0.1,
+        "api_rain_30d_mm": 341.98,
+        "api_soil_moisture": 0.688,
+        "api_temp_c": 35.0,
+        "api_inundation_pct": 44.0,
+        "pending_tier_request": "Action"
+      },
+      "modality_2_independent_satellite_reference": {
+        "district_name": "Sujawal",
+        "province": "Sindh",
+        "reference_source_radar": "UN FAO EVE / Copernicus Sentinel-1 SAR (10m Radar)",
+        "reference_source_precip": "GPM IMERG v07 Reference",
+        "observation_period_start": "2024-09-16",
+        "observation_period_end": "2024-09-30",
+        "geographical_coverage": "ADM2 PK226 (Sujawal District)",
+        "sentinel1_flooded_sq_km": 4251.89,
+        "sentinel1_inundation_pct": 44.43,
+        "sentinel1_pop_exposed": 274313,
+        "ref_rain_7d_mm": 0.2,
+        "ref_rain_30d_mm": 340.0,
+        "ref_soil_saturation_ratio_q99": 0.878
+      },
+      "modality_3_unstructured_text_report": {
+        "source_agency": "NDMA / PDMA Sindh Situation Report",
+        "report_date": "2024-09-20",
+        "geographical_coverage": "Sujawal District",
+        "raw_text": "Cumulative 30-day monsoon rainfall of 342 mm and downstream Indus flood wave have submerged low-lying coastal tehsils, leaving 44% inundated area across Sujawal.",
+        "nlp_extracted_claims": {
+          "extracted_rainfall_mm": 342.0,
+          "extracted_rainfall_window": "30d",
+          "extracted_inundation_pct": 44.0,
+          "narrative_flood_state": "ACTIVE_FLOOD_REPORTED",
+          "severity_keywords_found": [
+            "submerged",
+            "inundated"
+          ],
+          "normalcy_keywords_found": []
+        }
+      },
+      "pairwise_checks": {
+        "api_vs_satellite": {
+          "verdict": "CONSISTENT",
+          "explanation": "Primary API 7d rainfall (0.1 mm) and flood extent (44.0%) align with independent reference (0.2 mm rain; Sentinel-1 SAR = 44.43%)."
+        },
+        "text_vs_satellite": {
+          "verdict": "CONSISTENT",
+          "explanation": "Written report (ACTIVE_FLOOD_REPORTED) aligns with independent Sentinel-1 SAR (44.43% flooded area)."
+        },
+        "api_vs_text": {
+          "verdict": "EXPLAINED_WINDOW_DIFF",
+          "explanation": "API 7-day rainfall is 0.1 mm while text reports 342.0 mm because the written report cites 30-day cumulative monsoon rainfall (API 30d = 342.0 mm). Discrepancy explained."
+        }
+      },
+      "verification_result": {
+        "overall_verdict": "EXPLAINED_DISCREPANCY",
+        "human_review_status": "VERIFIED_WITH_WINDOW_NOTE \u2014 7d API vs 30d Report Window Matched; Proceed"
+      },
+      "funding_tier_evaluation": {
+        "requested_tier": "Action",
+        "verified_supported_tier": "Action",
+        "supporting_rf_flood_prob": 0.0567,
+        "supporting_rf_risk_score": 5.7,
+        "supporting_rf_tier": "Normal",
+        "tier_approved": true
+      }
+    },
+    {
+      "record_id": "REC-2025-HARIPUR-04",
+      "district_name": "Haripur",
+      "province": "Khyber Pakhtunkhwa",
+      "date": "2025-07-22",
+      "disaster_type": "Flash Flood",
+      "modality_1_structured_api_data": {
+        "record_id": "REC-2025-HARIPUR-04",
+        "district_name": "Haripur",
+        "province": "Khyber Pakhtunkhwa",
+        "observation_date": "2025-07-22",
+        "disaster_type": "Flash Flood",
+        "api_provider": "NASA POWER API (MERRA-2 0.5 deg) + GEE Inundation Feed",
+        "geographical_coverage": "ADM2 PK310 (Haripur District, 1,953.9 km2)",
+        "measurement_window": "Rolling 7-Day (2025-07-16 to 2025-07-22)",
+        "api_rain_7d_mm": 142.65,
+        "api_rain_30d_mm": 439.77,
+        "api_soil_moisture": 0.91,
+        "api_temp_c": 29.6,
+        "api_inundation_pct": 5.8,
+        "pending_tier_request": "Action"
+      },
+      "modality_2_independent_satellite_reference": {
+        "district_name": "Haripur",
+        "province": "Khyber Pakhtunkhwa",
+        "reference_source_radar": "UN FAO EVE / Copernicus Sentinel-1 SAR (10m Radar)",
+        "reference_source_precip": "GPM IMERG v07 Reference",
+        "observation_period_start": "2025-07-16",
+        "observation_period_end": "2025-07-31",
+        "geographical_coverage": "ADM2 PK310 (Haripur District)",
+        "sentinel1_flooded_sq_km": 137.12,
+        "sentinel1_inundation_pct": 5.8,
+        "sentinel1_pop_exposed": 25475,
+        "ref_rain_7d_mm": 140.0,
+        "ref_rain_30d_mm": 435.0,
+        "ref_soil_saturation_ratio_q99": 1.083
+      },
+      "modality_3_unstructured_text_report": {
+        "source_agency": "District Control Room Preliminary Text Bulletin (Stale / Unupdated)",
+        "report_date": "2025-07-22",
+        "geographical_coverage": "Haripur District",
+        "raw_text": "Normal weather conditions prevail in Haripur with 0 mm rainfall and no significant flooding reported across tehsils.",
+        "nlp_extracted_claims": {
+          "extracted_rainfall_mm": 0.0,
+          "extracted_rainfall_window": "7d",
+          "extracted_inundation_pct": 0.0,
+          "narrative_flood_state": "NO_FLOOD_REPORTED",
+          "severity_keywords_found": [],
+          "normalcy_keywords_found": [
+            "no significant flooding",
+            "normal weather"
+          ]
+        }
+      },
+      "pairwise_checks": {
+        "api_vs_satellite": {
+          "verdict": "CONSISTENT",
+          "explanation": "Primary API 7d rainfall (142.7 mm) and flood extent (5.8%) align with independent reference (140.0 mm rain; Sentinel-1 SAR = 5.80%)."
+        },
+        "text_vs_satellite": {
+          "verdict": "CONTRADICTION",
+          "explanation": "Written report claims normal weather / no flooding, contradicting independent Sentinel-1 SAR inundation (5.80%, 137.1 km2). Extracted text inundation (0.0%) contradicts Sentinel-1 SAR (5.80%)."
+        },
+        "api_vs_text": {
+          "verdict": "CONTRADICTION",
+          "explanation": "API 7d rainfall (142.7 mm) contradicts written report (0.0 mm). API flood extent (5.8%) contradicts written report (0.0%)."
+        }
+      },
+      "verification_result": {
+        "overall_verdict": "CONTRADICTION_DETECTED",
+        "human_review_status": "HUMAN_REVIEW_REQUIRED \u2014 Hold Automated Trigger & Investigate Source Conflict"
+      },
+      "funding_tier_evaluation": {
+        "requested_tier": "Action",
+        "verified_supported_tier": "Action",
+        "supporting_rf_flood_prob": 0.9668,
+        "supporting_rf_risk_score": 96.7,
+        "supporting_rf_tier": "Action",
+        "tier_approved": false
+      }
+    },
+    {
+      "record_id": "REC-2025-HARNAI-05",
+      "district_name": "Harnai",
+      "province": "Balochistan",
+      "date": "2025-07-15",
+      "disaster_type": "Flash Flood",
+      "modality_1_structured_api_data": {
+        "record_id": "REC-2025-HARNAI-05",
+        "district_name": "Harnai",
+        "province": "Balochistan",
+        "observation_date": "2025-07-15",
+        "disaster_type": "Flash Flood",
+        "api_provider": "NASA POWER API + Uncalibrated Optical Water Index Feed",
+        "geographical_coverage": "ADM2 PK410 (Harnai District)",
+        "measurement_window": "Rolling 7-Day (2025-07-09 to 2025-07-15)",
+        "api_rain_7d_mm": 93.3,
+        "api_rain_30d_mm": 117.09,
+        "api_soil_moisture": 0.57,
+        "api_temp_c": 32.2,
+        "api_inundation_pct": 16.5,
+        "pending_tier_request": "Action"
+      },
+      "modality_2_independent_satellite_reference": {
+        "district_name": "Harnai",
+        "province": "Balochistan",
+        "reference_source_radar": "UN FAO EVE / Copernicus Sentinel-1 SAR (Cloud-Penetrating Radar)",
+        "reference_source_precip": "GPM IMERG v07 Reference",
+        "observation_period_start": "2025-07-01",
+        "observation_period_end": "2025-07-15",
+        "geographical_coverage": "ADM2 PK410 (Harnai District)",
+        "sentinel1_flooded_sq_km": 0.48,
+        "sentinel1_inundation_pct": 0.02,
+        "sentinel1_pop_exposed": 6,
+        "ref_rain_7d_mm": 91.0,
+        "ref_rain_30d_mm": 115.0,
+        "ref_soil_saturation_ratio_q99": 0.76
+      },
+      "modality_3_unstructured_text_report": {
+        "source_agency": "Local Field Situation Report",
+        "report_date": "2025-07-15",
+        "geographical_coverage": "Harnai District",
+        "raw_text": "Heavy 93 mm rainfall over the past 7 days caused catastrophic overflow with 16.5% inundated area across valleys.",
+        "nlp_extracted_claims": {
+          "extracted_rainfall_mm": 93.0,
+          "extracted_rainfall_window": "7d",
+          "extracted_inundation_pct": 16.5,
+          "narrative_flood_state": "ACTIVE_FLOOD_REPORTED",
+          "severity_keywords_found": [
+            "catastrophic",
+            "inundated",
+            "overflow"
+          ],
+          "normalcy_keywords_found": []
+        }
+      },
+      "pairwise_checks": {
+        "api_vs_satellite": {
+          "verdict": "CONTRADICTION",
+          "explanation": "Primary API rainfall (93.3 mm) is confirmed by reference (91.0 mm), BUT API flood extent (16.5%) contradicts independent Sentinel-1 SAR radar (0.02%)."
+        },
+        "text_vs_satellite": {
+          "verdict": "CONTRADICTION",
+          "explanation": "Written report claims active widespread flooding (16.5%), but independent Sentinel-1 SAR shows only 0.02% surface water. Extracted text inundation (16.5%) contradicts Sentinel-1 SAR (0.02%)."
+        },
+        "api_vs_text": {
+          "verdict": "CONSISTENT",
+          "explanation": "Structured API telemetry and extracted text claims are consistent."
+        }
+      },
+      "verification_result": {
+        "overall_verdict": "CONTRADICTION_DETECTED",
+        "human_review_status": "HUMAN_REVIEW_REQUIRED \u2014 Hold Automated Trigger & Investigate Source Conflict"
+      },
+      "funding_tier_evaluation": {
+        "requested_tier": "Action",
+        "verified_supported_tier": "Normal",
+        "supporting_rf_flood_prob": 0.0034,
+        "supporting_rf_risk_score": 0.3,
+        "supporting_rf_tier": "Normal",
+        "tier_approved": false
+      }
+    }
+  ]
+}

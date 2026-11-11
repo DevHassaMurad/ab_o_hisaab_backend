@@ -117,6 +117,67 @@ class RiskEngine:
                     "requires_dc_approval": False}
         return {"tier": "Normal", "release_pct": 0.0, "requires_dc_approval": False}
 
+    def evaluate_with_c12_verification(
+        self,
+        district_name: str,
+        date_str: str,
+        fao_end_date: str,
+        text_report_str: str,
+        api_inundation_pct: float | None = None,
+    ) -> dict:
+        """Run full pipeline: Random Forest + SHAP XAI (C06) + Multimodal Verification (C12)."""
+        from src.verification.c12_verification_engine import (
+            ClimateEvidenceVerificationEngine,
+            StructuredAPITelemetry,
+            IndependentSatelliteReference,
+            UnstructuredTextReport,
+        )
+        verifier = ClimateEvidenceVerificationEngine()
+        r_n, r_f, df_row = verifier.get_district_Records(district_name, date_str, fao_end_date)
+        prob = float(verifier.forecast_model.predict_proba(df_row)[0])
+        score = float(self.probability_to_score(prob))
+        tier_info = self.score_to_tier(score)
+
+        inund_val = float(r_f["perc_total_area_flooded"]) if api_inundation_pct is None else float(api_inundation_pct)
+        api_obj = StructuredAPITelemetry(
+            record_id=f"LIVE-{district_name.upper()}-{date_str}",
+            district_name=district_name,
+            province=str(r_n["province"]),
+            observation_date=date_str,
+            disaster_type="Flash Flood" if str(r_n["flood_mode"]) == "flash" else "Slow Riverine Flood",
+            api_provider="NASA POWER API (MERRA-2)",
+            geographical_coverage=f"ADM2 {r_n['district_pcode']} ({district_name})",
+            measurement_window="Rolling 7-Day",
+            api_rain_7d_mm=round(float(r_n["rain_7d"]), 2),
+            api_rain_30d_mm=round(float(r_n["rain_30d"]), 2),
+            api_soil_moisture=round(float(r_n["gwettop"]), 3),
+            api_temp_c=round(float(r_n["t2m_max"]), 1),
+            api_inundation_pct=round(inund_val, 2),
+            pending_tier_request=tier_info["tier"],
+        )
+        sat_obj = IndependentSatelliteReference(
+            district_name=district_name,
+            province=str(r_n["province"]),
+            reference_source_radar="UN FAO EVE / Copernicus Sentinel-1 SAR",
+            reference_source_precip="Independent Satellite Reference",
+            observation_period_start=str(r_f["start_date"]),
+            observation_period_end=str(r_f["end_date"]),
+            geographical_coverage=f"ADM2 {r_n['district_pcode']} ({district_name})",
+            sentinel1_flooded_sq_km=round(float(r_f["total_area_flooded_sq_km"]), 2),
+            sentinel1_inundation_pct=round(float(r_f["perc_total_area_flooded"]), 2),
+            sentinel1_pop_exposed=int(r_f["pop_exposed"]),
+            ref_rain_7d_mm=round(float(r_n["rain_7d"]), 2),
+            ref_rain_30d_mm=round(float(r_n["rain_30d"]), 2),
+            ref_soil_saturation_ratio_q99=round(float(r_n["gwettop_rel_q99"]), 3),
+        )
+        txt_obj = UnstructuredTextReport(
+            source_agency="PDMA / District Situation Report",
+            report_date=date_str,
+            geographical_coverage=district_name,
+            raw_text=text_report_str,
+        )
+        return verifier.verify(api_obj, sat_obj, txt_obj, df_row)
+
 
 def run_backtests():
     fm = FloodForecastModel()
