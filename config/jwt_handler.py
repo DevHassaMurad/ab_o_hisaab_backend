@@ -11,10 +11,9 @@ class JwtHandler:
         self.algorithm = os.environ.get("JWT_ALGORITHM") or "HS256"
         self.expire_minutes = int(os.environ.get("JWT_EXPIRE_MINUTES", 30))
         
-    def create_token(self, user_id, role=None, district_id=None, name=None, email=None):
+    def create_token(self, user_id, token_version=0, role=None, district_id=None, name=None, email=None):
         """The portal reads role and district_id from the token to pick the user's pages.
         Every API must still check the role server-side; the token claims are not a permission by themselves."""
-    def create_token(self,user_id, token_version=0):
         expire = datetime.now(timezone.utc) + timedelta(minutes=self.expire_minutes)
         payload = {
             "sub" : str(user_id),

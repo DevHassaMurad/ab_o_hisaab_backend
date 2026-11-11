@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from config.database import Base
 from migrations.seeders import seed_users
+from model.role_model import Role
 from model.user_model import User
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -73,22 +74,27 @@ class MigrationTests(unittest.TestCase):
         command.upgrade(self.config, "head")
         self.assertTrue(inspect(self.connection).has_table("users"))
 
-    def test_optional_seed_is_repeatable_and_passwords_are_hashed(self):
+    def test_admin_seed_is_repeatable_and_password_is_hashed(self):
         command.upgrade(self.config, "head")
         self.connection.commit()
-        with patch.dict(os.environ, {
-            "SEED_DADU_DISTRICT_ID": "00000000-0000-0000-0000-000000000001",
-            "SEED_BUNER_DISTRICT_ID": "00000000-0000-0000-0000-000000000002",
-        }):
-            self.assertEqual(seed_users("demo-test-password", self.connection), 5)
+        with patch.dict(os.environ, {"SEED_ADMIN_EMAIL": "Admin@PDMA.gov.pk", "SEED_ADMIN_NAME": "PDMA Admin"}):
+            self.assertEqual(seed_users("admin-test-password", self.connection), 1)
             self.assertEqual(seed_users("another-test-password", self.connection), 0)
         with Session(self.connection) as session:
             users = session.scalars(select(User)).all()
-            self.assertEqual(len(users), 5)
-            for user in users:
-                self.assertTrue(PasswordHash.recommended().verify("demo-test-password", user.password))
-                if user.role_id == 2:
-                    self.assertIsNotNone(user.district_id)
+            self.assertEqual(len(users), 1)
+            admin = users[0]
+            self.assertEqual(admin.email, "admin@pdma.gov.pk")
+            self.assertEqual(session.get(Role, admin.role_id).name, "ADMIN")
+            self.assertIsNone(admin.district_id)
+            self.assertIsNotNone(admin.email_verified_at)
+            self.assertTrue(PasswordHash.recommended().verify("admin-test-password", admin.password))
+
+    def test_seed_rejects_short_password(self):
+        command.upgrade(self.config, "head")
+        self.connection.commit()
+        with self.assertRaises(ValueError):
+            seed_users("short", self.connection)
 
     def test_legacy_baseline_preserves_table(self):
         from artisan import baseline

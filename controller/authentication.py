@@ -8,8 +8,6 @@ import secrets
 from datetime import UTC, datetime, timedelta
 
 from pwdlib import PasswordHash
-from model.user_model import User
-from model.role_model import Role
 from sqlalchemy import func, or_, select
 
 from config.auth_mail import AuthMailer, MailDeliveryError
@@ -63,31 +61,26 @@ class Authentication:
             .first()
         )
 
-        if user and self.password.verify(data["password"], user.password):
-            if not user.is_active:
-                return {"error": "This account is disabled. Contact your PDMA administrator."}, 403
-            role = self.db_session.get(Role, user.role_id)
-            if role is None or role.name == "UNASSIGNED":
-                return {"error": "This account has no role yet. Contact your PDMA administrator."}, 403
-            access_token = self.jwt_handler.create_token(
-                user_id=user.id, role=role.name, district_id=user.district_id,
-                name=user.name, email=user.email,
-            )
         if user and user.is_active and self.password.verify(data["password"], user.password):
             if not user.email_verified_at:
                 return {"error": "Confirm your email address before signing in.", "code": "EMAIL_NOT_VERIFIED"}, 403
-            if user.role_id == 0:
+            role = self.db_session.get(Role, user.role_id)
+            if user.role_id == 0 or role is None:
                 return {
                     "error": "Your account is awaiting role assignment. Contact your administrator.",
                     "code": "ROLE_UNASSIGNED",
                 }, 403
-            access_token = self.jwt_handler.create_token(user_id=user.id, token_version=user.token_version)
+            # The portal reads role, district, name and email from the token to choose the user's pages.
+            access_token = self.jwt_handler.create_token(
+                user_id=user.id, token_version=user.token_version, role=role.name,
+                district_id=user.district_id, name=user.name, email=user.email,
+            )
 
             return {
                 "message": "Authentication successful.",
                 "access_token": access_token,
                 "token_type": "bearer",
-                "role": self.db_session.get(Role, user.role_id).name,
+                "role": role.name,
             }, 200
         else:
             return {"error": "Invalid email/username or password."}, 401

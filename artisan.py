@@ -42,13 +42,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="action", required=True)
     migrate = commands.add_parser("migrate", help="Apply pending schema migrations")
-    migrate.add_argument("--seed", action="store_true", help="Also create optional demo users")
+    migrate.add_argument("--seed", action="store_true", help="Also create the PDMA admin account")
     rollback = commands.add_parser("migrate:rollback", help="Undo the latest migration(s)")
     rollback.add_argument("--step", type=int, default=1)
     commands.add_parser("migrate:reset", help="Undo all migrations (drops migrated tables/data)")
     commands.add_parser("migrate:status", help="Show current revision and migration history")
     commands.add_parser("migrate:baseline", help="Adopt the existing four-column users table without recreating it")
-    commands.add_parser("db:seed", help="Create optional demo users without overwriting existing accounts")
+    commands.add_parser("db:seed", help="Create the PDMA admin account without overwriting existing accounts")
     make = commands.add_parser("make:migration", help="Create a migration with upgrade/downgrade functions")
     make.add_argument("name")
     make.add_argument("--autogenerate", action="store_true")
@@ -77,8 +77,8 @@ def main():
 
         if args.action == "db:seed" or (args.action == "migrate" and args.seed):
             from migrations.seeders import seed_users
-            password = os.environ.get("SEED_USER_PASSWORD") or getpass("Demo users password (12+ characters): ")
-            print(f"Created {seed_users(password)} demo user(s); existing accounts unchanged.")
+            password = os.environ.get("SEED_USER_PASSWORD") or getpass("PDMA admin password (12+ characters): ")
+            print(f"Created {seed_users(password)} PDMA admin account(s); existing accounts unchanged.")
     except Exception as exc:
         # Do not dump database connection URLs or passwords into CLI output.
         from sqlalchemy.exc import SQLAlchemyError

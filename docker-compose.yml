@@ -47,25 +47,6 @@ services:
       - "127.0.0.1:1025:1025"
       - "127.0.0.1:8025:8025"
 
-  # Database for the new API structure (main.py, routes/, controller/, model/).
-  # Root password and database name come from .env (DATABASE_PASSWORD, DATABASE_NAME).
-  mysql:
-    image: mysql:8.4
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
-      # Local development only: lets the root password be empty when .env leaves DATABASE_PASSWORD blank.
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: ${DATABASE_NAME:-aab_o_hisaab}
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysqldata:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-
 volumes:
   pgdata:
   mysqldata:
