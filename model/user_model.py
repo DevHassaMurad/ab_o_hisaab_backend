@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, true
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from config.database import Base
 from model.role_model import Role
@@ -24,6 +24,8 @@ class User(Base):
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     registration_status: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    # Added by migration 0004_donations; used for "registered on" in the PDMA donor list.
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
     donor_details = relationship('DonorDetails', back_populates='user', uselist=False, cascade='all, delete-orphan', passive_deletes=True)
     ngo_details = relationship('NgoDetails', back_populates='user', uselist=False, cascade='all, delete-orphan', passive_deletes=True)
     householder_details = relationship('HouseholderDetails', back_populates='user', uselist=False, cascade='all, delete-orphan', passive_deletes=True)

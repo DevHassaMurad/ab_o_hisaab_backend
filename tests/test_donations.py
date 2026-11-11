@@ -41,7 +41,7 @@ class DonationFixture:
         config = Config(str(ROOT / "alembic.ini"))
         with cls.engine.begin() as connection:
             config.attributes["connection"] = connection
-            command.upgrade(config, "head")
+            command.upgrade(config, "heads")
         with patch.dict(os.environ, {"SEED_DONOR_PASSWORD": DONOR[1], "SEED_NGO_PASSWORD": NGO[1],
                                      "APP_ENV": "development"}):
             seed_users(ADMIN[1], cls.engine, echo=lambda *_: None)

@@ -1,7 +1,7 @@
 from fastapi import FastAPI,Depends,APIRouter
 import os
 import uvicorn
-from routes import auth_routes, campaign_routes, donation_routes, donor_ledger_routes, donor_report_routes, fund_routes, health_routes, ngo_routes, notification_routes
+from routes import auth_routes, campaign_routes, forecast_routes, donation_routes, donor_ledger_routes, donor_report_routes, fund_routes, health_routes, ngo_routes, notification_routes
 from routes import auth_routes, health_routes, registration_routes, document_routes, verification_routes
 from fastapi.middleware.cors import CORSMiddleware
 from config.document_storage import UploadSizeLimit
@@ -18,14 +18,40 @@ from config.outbox import outbox_worker
 
 @asynccontextmanager
 async def lifespan(_app):
+    # FastAPI ignores @app.on_event("startup") when a lifespan is set, so startup work runs here.
+    recover_document_jobs()
     # Deliver queued emails (and retry failed ones) for the life of the process.
     task = None if os.environ.get("DISABLE_OUTBOX_WORKER") else asyncio.create_task(outbox_worker(engine))
     # Campaign activation and expiry (scheduled -> active, ended -> completed), once a minute.
     sched = None if os.environ.get("DISABLE_OUTBOX_WORKER") else asyncio.create_task(campaign_scheduler())
+    # Forecast data refresh (NASA POWER -> model scores -> Open-Meteo -> EONET -> IMERG) every 6 hours.
+    fc = None if os.environ.get("DISABLE_OUTBOX_WORKER") or os.environ.get("DISABLE_FORECAST_JOBS")         else asyncio.create_task(forecast_scheduler())
     yield
-    for t in (task, sched):
+    for t in (task, sched, fc):
         if t:
             t.cancel()
+
+
+async def forecast_scheduler():
+    from routes.forecast_routes import _refresh_lock
+    from config.database import SessionLocal
+    from controller.forecasting import refresh_all
+    import logging
+    await asyncio.sleep(30)
+    while True:
+        def job():
+            if not _refresh_lock.acquire(blocking=False):
+                return
+            try:
+                with SessionLocal() as db:
+                    refresh_all(db, "schedule")
+            finally:
+                _refresh_lock.release()
+        try:
+            await asyncio.to_thread(job)
+        except Exception:
+            logging.getLogger(__name__).exception("Forecast refresh failed.")
+        await asyncio.sleep(6 * 3600)
 
 
 async def campaign_scheduler():
@@ -45,7 +71,6 @@ async def campaign_scheduler():
 
 
 app = FastAPI(lifespan=lifespan)
-app = FastAPI()
 app.add_middleware(UploadSizeLimit)
 app.add_middleware(CORSMiddleware,
     allow_origins=[origin.strip() for origin in os.environ.get('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(',') if origin.strip()],
@@ -66,6 +91,7 @@ api_router.include_router(donor_report_routes.router)
 api_router.include_router(donor_ledger_routes.router)
 api_router.include_router(ngo_routes.router)
 api_router.include_router(campaign_routes.router)
+api_router.include_router(forecast_routes.router)
 app.include_router(api_router)
 # Keep the existing portal's auth paths compatible with the MySQL backend.
 app.include_router(auth_routes.router, prefix="/api/v1", include_in_schema=False)
@@ -73,7 +99,6 @@ app.include_router(registration_routes.router, prefix="/api/v1", include_in_sche
 app.include_router(document_routes.router, prefix="/api/v1", include_in_schema=False)
 app.include_router(verification_routes.router, prefix="/api/v1", include_in_schema=False)
 
-@app.on_event('startup')
 def recover_document_jobs():
     from controller.verification import recover_interrupted_jobs
     recover_interrupted_jobs()

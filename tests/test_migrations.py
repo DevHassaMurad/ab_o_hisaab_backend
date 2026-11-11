@@ -62,6 +62,9 @@ class MigrationTests(unittest.TestCase):
         command.upgrade(self.config, "head")
         self.assertEqual(self.connection.scalar(text("SELECT role_id FROM users WHERE id=7")), 0)
         self.connection.commit()
+        command.downgrade(self.config, "0012_forecasting")  # leave the merge point (registration branch stays applied)
+        command.downgrade(self.config, "-1")  # 0012 forecasting
+        self.assertFalse(inspect(self.connection).has_table("district_risk_assessments"))
         command.downgrade(self.config, "-1")  # 0011 campaigns
         for table in ("donation_campaigns", "campaign_contributions", "campaign_documents", "campaign_events",
                       "campaign_notices"):
