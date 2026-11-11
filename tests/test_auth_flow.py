@@ -180,6 +180,28 @@ class AuthFlowTests(unittest.TestCase):
         self.assertIn('&lt;script&gt;', html)
         self.assertIn('10 minutes', text)
 
+    def test_registration_sends_confirmation_without_accepting_a_privileged_role(self):
+        response = self.client.post('/api/auth/register', json={
+            'email':'new@example.org', 'user_name':'New User', 'password':'new-account-password', 'role_id':4,
+        })
+        self.assertEqual(response.status_code, 202)
+        user = self.db.scalar(select(User).where(User.email == 'new@example.org'))
+        self.assertEqual(user.role_id, 0)
+        self.assertIsNone(user.email_verified_at)
+        self.assertEqual(self.mail.messages[-1][0], 'email_confirmation')
+        response = self.client.post('/api/auth/email-verification/verify', json={
+            'email':user.email, 'code':self.mail.messages[-1][1],
+        })
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post('/api/auth/authenticate', json={'email':user.email,'password':'new-account-password'})
+        self.assertEqual(response.json()['code'], 'ROLE_UNASSIGNED')
+
+    def test_logout_revokes_the_issued_access_token(self):
+        token = self.client.post('/api/auth/token', data={'username':self.user.email,'password':'original-password'}).json()['access_token']
+        headers = {'Authorization':f'Bearer {token}'}
+        self.assertEqual(self.client.post('/api/auth/logout', headers=headers).status_code, 200)
+        self.assertEqual(self.client.get('/api/auth/me', headers=headers).status_code, 401)
+
 
 if __name__ == '__main__':
     unittest.main()

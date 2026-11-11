@@ -33,8 +33,6 @@ class Authentication:
         self.db_session = db_session
         self.password = PasswordHash.recommended()
         self.jwt_handler = JwtHandler()
-        self.db = db_session
-        self.hasher = self.password
         self.mailer = mailer or AuthMailer()
 
     def register_user(self, data):
@@ -77,7 +75,7 @@ class Authentication:
                 "message": "Authentication successful.",
                 "access_token": access_token,
                 "token_type": "bearer",
-                "role": self.db.get(Role, user.role_id).name,
+                "role": self.db_session.get(Role, user.role_id).name,
             }, 200
         else:
             return {"error": "Invalid email/username or password."}, 401
@@ -94,7 +92,7 @@ class Authentication:
             self.mailer.ensure_configured()
         except MailDeliveryError as exc:
             raise AuthFlowError("MAIL_UNAVAILABLE", "Email delivery is temporarily unavailable.", 503) from exc
-        background_tasks.add_task(self.deliver_code, self.db.get_bind(), email, purpose)
+        background_tasks.add_task(self.deliver_code, self.db_session.get_bind(), email, purpose)
         return {"message": GENERIC_MESSAGE}
 
     @staticmethod
@@ -109,7 +107,7 @@ class Authentication:
                 logging.getLogger(__name__).error("Verification request could not be processed.")
 
     def user(self, email):
-        return self.db.scalar(
+        return self.db_session.scalar(
             select(User)
             .where(func.lower(User.email) == email.strip().lower())
             .with_for_update()
@@ -117,7 +115,7 @@ class Authentication:
         )
 
     def challenge(self, user, purpose):
-        return self.db.scalar(
+        return self.db_session.scalar(
             select(AuthChallenge)
             .where(
                 AuthChallenge.user_id == user.id,
@@ -136,7 +134,7 @@ class Authentication:
             ) from exc
         user = self.user(email)
         if not user or not user.is_active or (purpose == "email_confirmation" and user.email_verified_at):
-            self.db.rollback()
+            self.db_session.rollback()
             return {"message": GENERIC_MESSAGE}
         now = now_utc()
         challenge = self.challenge(user, purpose)
@@ -146,14 +144,14 @@ class Authentication:
             (now - challenge.sent_at).total_seconds() < 60
             or (now - challenge.window_start < timedelta(hours=1) and challenge.send_count >= 5)
         ):
-            self.db.rollback()
+            self.db_session.rollback()
             return {"message": GENERIC_MESSAGE}
         code = f"{secrets.randbelow(1_000_000):06d}"
         nonce = secrets.token_urlsafe(32)
         code_hash = self.digest(f"{user.id}:{purpose}:{nonce}:{code}")
         if challenge is None:
             challenge = AuthChallenge(user_id=user.id, purpose=purpose, window_start=now, send_count=0)
-            self.db.add(challenge)
+            self.db_session.add(challenge)
         if now - challenge.window_start >= timedelta(hours=1):
             challenge.window_start, challenge.send_count = now, 0
         challenge.code_hash, challenge.nonce = code_hash, nonce
@@ -164,9 +162,9 @@ class Authentication:
         challenge.reset_token_hash = challenge.reset_expires_at = None
         try:
             self.mailer.send(user.email, user.name, purpose, code)
-            self.db.commit()
+            self.db_session.commit()
         except MailDeliveryError:
-            self.db.rollback()
+            self.db_session.rollback()
             # Keep the account-existence response consistent even if a provider fails.
             logging.getLogger(__name__).error("Verification email delivery failed; check SMTP configuration.")
         return {"message": GENERIC_MESSAGE}
@@ -183,23 +181,23 @@ class Authentication:
             or challenge.verified_at
             or (challenge.expires_at <= now or challenge.attempts >= 5)
         ):
-            self.db.rollback()
+            self.db_session.rollback()
             raise AuthFlowError("INVALID_CODE", "This code is invalid or expired. Request a new code.")
         expected = self.digest(f"{user.id}:{purpose}:{challenge.nonce}:{code}")
         if not hmac.compare_digest(expected, challenge.code_hash):
             challenge.attempts += 1
-            self.db.commit()
+            self.db_session.commit()
             raise AuthFlowError("INVALID_CODE", "This code is invalid or expired. Request a new code.")
         challenge.verified_at = now
         if purpose == "email_confirmation":
             user.email_verified_at = now
             challenge.consumed_at = now
-            self.db.commit()
+            self.db_session.commit()
             return {"message": "Email confirmed. You can now sign in."}
         token = secrets.token_urlsafe(32)
         challenge.reset_token_hash = self.digest(token)
         challenge.reset_expires_at = now + timedelta(minutes=10)
-        self.db.commit()
+        self.db_session.commit()
         return {"reset_token": token, "expires_in": 600}
 
     @staticmethod
@@ -221,35 +219,35 @@ class Authentication:
             or (not challenge.reset_expires_at or challenge.reset_expires_at <= now or not challenge.reset_token_hash)
             or not hmac.compare_digest(self.digest(token), challenge.reset_token_hash)
         ):
-            self.db.rollback()
+            self.db_session.rollback()
             raise AuthFlowError("INVALID_RESET_TOKEN", "Your reset session is invalid or expired. Request a new code.")
         self._save_password(user, password)
         return {"message": "Password reset successfully. Sign in with your new password."}
 
     def change_password(self, user, current_password, new_password):
         self.validate_password(new_password)
-        locked = self.db.scalar(
+        locked = self.db_session.scalar(
             select(User).where(User.id == user.id).with_for_update().execution_options(populate_existing=True)
         )
-        if not self.hasher.verify(current_password, locked.password):
-            self.db.rollback()
+        if not self.password.verify(current_password, locked.password):
+            self.db_session.rollback()
             raise AuthFlowError("WRONG_CURRENT_PASSWORD", "Your current password is incorrect.", 400)
         self._save_password(locked, new_password)
         return {"message": "Password changed. Please sign in again."}
 
     def _save_password(self, user, password):
-        if self.hasher.verify(password, user.password):
-            self.db.rollback()
+        if self.password.verify(password, user.password):
+            self.db_session.rollback()
             raise AuthFlowError("PASSWORD_REUSED", "Choose a password different from your current password.", 422)
-        user.password = self.hasher.hash(password)
+        user.password = self.password.hash(password)
         user.token_version += 1
         # A password reset proves control of the same email address.
         user.email_verified_at = user.email_verified_at or now_utc()
-        for challenge in self.db.scalars(select(AuthChallenge).where(AuthChallenge.user_id == user.id)):
+        for challenge in self.db_session.scalars(select(AuthChallenge).where(AuthChallenge.user_id == user.id)):
             challenge.consumed_at = now_utc()
             challenge.reset_token_hash = None
         recipient, name = user.email, user.name
-        self.db.commit()
+        self.db_session.commit()
         try:
             self.mailer.send(recipient, name, "password_changed")
         except MailDeliveryError:

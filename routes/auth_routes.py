@@ -5,7 +5,7 @@ from time import monotonic
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field, ValidationError, model_validator
 from sqlalchemy import select, text, update
 from sqlalchemy.orm import Session
 
@@ -42,13 +42,13 @@ router = APIRouter(prefix="/auth", tags=["Authentication"], dependencies=[Depend
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: EmailStr = Field(max_length=100)
     user_name: str = ""
     password: str = Field(min_length=1, max_length=128)
 
 
 class EmailRequest(BaseModel):
-    email: EmailStr
+    email: EmailStr = Field(max_length=100)
 
 
 class VerifyRequest(EmailRequest):
@@ -78,6 +78,10 @@ class ChangePasswordRequest(BaseModel):
 
 
 def login_response(data, db):
+    try:
+        data = LoginRequest.model_validate(data).model_dump()
+    except ValidationError:
+        return JSONResponse({"detail": "Email or password is incorrect.", "code": "BAD_CREDENTIALS"}, status_code=401)
     response, status = Authentication(db).authenticate(data)
     if status != 200:
         return JSONResponse(
