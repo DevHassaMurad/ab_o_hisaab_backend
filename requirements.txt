@@ -9,3 +9,10 @@ python-dotenv==1.2.2
 python-multipart==0.0.33
 SQLAlchemy==2.1.8
 uvicorn==0.47.0
+opencv-python==4.14.0.94
+numpy==2.4.6
+Pillow==12.3.0
+pytesseract==0.3.13
+pypdfium2==5.15.2
+cryptography==50.0.2
+httpx==0.28.1

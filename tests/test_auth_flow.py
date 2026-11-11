@@ -184,17 +184,8 @@ class AuthFlowTests(unittest.TestCase):
         response = self.client.post('/api/auth/register', json={
             'email':'new@example.org', 'user_name':'New User', 'password':'new-account-password', 'role_id':4,
         })
-        self.assertEqual(response.status_code, 202)
-        user = self.db.scalar(select(User).where(User.email == 'new@example.org'))
-        self.assertEqual(user.role_id, 0)
-        self.assertIsNone(user.email_verified_at)
-        self.assertEqual(self.mail.messages[-1][0], 'email_confirmation')
-        response = self.client.post('/api/auth/email-verification/verify', json={
-            'email':user.email, 'code':self.mail.messages[-1][1],
-        })
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post('/api/auth/authenticate', json={'email':user.email,'password':'new-account-password'})
-        self.assertEqual(response.json()['code'], 'ROLE_UNASSIGNED')
+        self.assertEqual(response.status_code, 422)
+        self.assertIsNone(self.db.scalar(select(User).where(User.email == 'new@example.org')))
 
     def test_logout_revokes_the_issued_access_token(self):
         token = self.client.post('/api/auth/token', data={'username':self.user.email,'password':'original-password'}).json()['access_token']

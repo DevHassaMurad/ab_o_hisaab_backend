@@ -13,6 +13,14 @@ class MailDeliveryError(Exception):
 
 
 def render_email(name, purpose, code=None):
+    if purpose in ('document_approved', 'document_rejected'):
+        approved = purpose == 'document_approved'
+        title = 'Your document review is complete'
+        detail = ('Your document has been approved. Email confirmation and an assigned portal role are still required for access.'
+                  if approved else 'Your document requires correction. Sign in when access is available or contact your administrator to arrange a corrected submission.')
+        text = f'Aab o Hisaab\n\n{title}\n\nHello {name},\n\n{detail}\n'
+        html = f'<html lang="en"><body><h1>{escape(title)}</h1><p>Hello {escape(name)},</p><p>{escape(detail)}</p></body></html>'
+        return title, text, html
     confirmation = purpose == "email_confirmation"
     changed = purpose == "password_changed"
     title = (
