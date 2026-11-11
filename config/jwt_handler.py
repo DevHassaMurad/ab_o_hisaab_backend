@@ -11,13 +11,14 @@ class JwtHandler:
         self.algorithm = os.environ.get("JWT_ALGORITHM") or "HS256"
         self.expire_minutes = int(os.environ.get("JWT_EXPIRE_MINUTES", 30))
         
-    def create_token(self,user_id):
+    def create_token(self,user_id, token_version=0):
         expire = datetime.now(timezone.utc) + timedelta(minutes=self.expire_minutes)
         payload = {
             "sub" : str(user_id),
             "exp" : expire,
             "iat" : datetime.now(timezone.utc),
-            "type" : "access"
+            "type" : "access",
+            "ver": token_version,
         }
         token = jwt.encode(
             payload,
@@ -34,6 +35,8 @@ class JwtHandler:
                 algorithms=[self.algorithm],
                 options={"require": ["sub", "exp", "iat"]}
                 )
+            if payload.get("type") != "access":
+                raise InvalidTokenError("Invalid token type")
             return payload
         except ExpiredSignatureError:
             raise ExpiredSignatureError("Token has expired")

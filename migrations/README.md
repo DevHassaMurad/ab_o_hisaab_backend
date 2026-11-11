@@ -71,6 +71,11 @@ The donor's fund links are not seeded because fund tables do not exist yet.
 
 ## Rollback behavior
 
+Revision 0003 adds email verification, session versions and code challenges. Its
+rollback removes those fields/challenges while retaining the users and roles tables.
+Existing accounts are unverified after upgrading and must confirm their email;
+see [authentication setup](../docs/authentication.md).
+
 Rolling back 0002 removes image, role_id, district_id, is_active and roles, while
 retaining users' original four columns. Values in removed columns are lost.
 Rolling back 0001 drops users, including data even if that table was baselined.

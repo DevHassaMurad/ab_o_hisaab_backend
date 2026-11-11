@@ -7,9 +7,11 @@ from datetime import date, timedelta
 
 import httpx
 import pytest
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
+load_dotenv()
 TEST_DB = os.environ.get("TEST_DATABASE_URL", "postgresql+psycopg://aab:aab@localhost:5432/aab_test")
 
 
@@ -20,12 +22,12 @@ def engine():
         with eng.connect() as c:
             c.execute(text("SELECT 1"))
     except Exception as exc:  # pragma: no cover
-        pytest.skip(f"test database not reachable ({exc}); run `docker compose up -d db`")
+        pytest.skip(f"test database not reachable ({exc}); run `docker compose --profile postgres up -d db`")
     from alembic.config import Config
 
     from alembic import command
 
-    cfg = Config("alembic.ini")
+    cfg = Config("alembic.app.ini")
     cfg.set_main_option("sqlalchemy.url", TEST_DB)
     with eng.begin() as c:
         c.execute(text("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; CREATE EXTENSION postgis"))

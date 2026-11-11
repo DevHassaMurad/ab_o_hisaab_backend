@@ -1,5 +1,0 @@
-CREATE DATABASE aab_test;
-\c aab_test
-CREATE EXTENSION IF NOT EXISTS postgis;
-\c aab
-CREATE EXTENSION IF NOT EXISTS postgis;

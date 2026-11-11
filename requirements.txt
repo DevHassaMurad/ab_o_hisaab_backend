@@ -1,9 +1,11 @@
 alembic==1.20.1
+email-validator==2.3.0
 fastapi==0.136.1
 pwdlib[argon2]==0.3.1
 pydantic==2.13.4
 PyJWT==2.15.1
-PyMySQL==1.2.4
+PyMySQL[rsa]==1.2.4
 python-dotenv==1.2.2
+python-multipart==0.0.33
 SQLAlchemy==2.1.8
 uvicorn==0.47.0

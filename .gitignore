@@ -1,8 +1,58 @@
 .venv/
+venv/
+env/
 __pycache__/
-*.pyc
+*.py[cod]
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
 *.egg-info/
-.env
+build/
+dist/
+
+# Local configuration and credentials; keep the sanitized examples.
+.env*
+!.env-example
+!.env.example
 secrets/
+.aws/
+*.pem
+*.key
+.claude/settings.local.json
+
+# Test, coverage and runtime output.
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.log
+logs/
+*.pid
+*.tmp
+
+# Local database files, Docker bind-mount data and backups.
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite3-journal
+*.dump
+*.sql.gz
+/backups/
+/docker/data/
+
+# Downloaded/intermediate data and locally trained model binaries.
+# Keep data/seeds, replay fixtures/manifests, ML configuration and report JSONs.
+/data/raw/
+/data/processed/
+/data/downloads/
+/data/cache/
+/ml/artifacts/
+
+# Local editor and operating-system files.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
