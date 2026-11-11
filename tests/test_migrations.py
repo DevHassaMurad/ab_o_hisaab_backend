@@ -16,6 +16,9 @@ from config.database import Base
 from migrations.seeders import seed_users
 from model.role_model import Role
 from model.user_model import User
+from model.donation_model import DonorProfile
+import model.notification_model  # noqa: F401  (register tables for the metadata comparison)
+import model.fund_model  # noqa: F401  (includes ngo_expenditures)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -59,6 +62,18 @@ class MigrationTests(unittest.TestCase):
         command.upgrade(self.config, "head")
         self.assertEqual(self.connection.scalar(text("SELECT role_id FROM users WHERE id=7")), 0)
         self.connection.commit()
+        command.downgrade(self.config, "-1")  # 0007 NGO expenditures
+        self.assertFalse(inspect(self.connection).has_table("ngo_expenditures"))
+        command.downgrade(self.config, "-1")  # 0006 PDMA fund ledger
+        for table in ("donor_donations", "donation_disbursements", "email_outbox"):
+            self.assertFalse(inspect(self.connection).has_table(table))
+        command.downgrade(self.config, "-1")  # 0005 donor response
+        self.assertNotIn("donor_response", {c["name"] for c in inspect(self.connection).get_columns("donation_requests")})
+        command.downgrade(self.config, "-1")  # 0004 donations
+        for table in ("donation_requests", "donations", "fund_allocations", "notifications", "ngos"):
+            self.assertFalse(inspect(self.connection).has_table(table))
+        self.assertNotIn("created_at", {c["name"] for c in inspect(self.connection).get_columns("users")})
+        self.assertEqual(self.connection.scalar(text("SELECT email FROM users WHERE id=7")), "old@example.test")
         command.downgrade(self.config, "-1")
         self.assertFalse(inspect(self.connection).has_table("auth_challenges"))
         self.assertNotIn("email_verified_at", {c["name"] for c in inspect(self.connection).get_columns("users")})
@@ -74,21 +89,34 @@ class MigrationTests(unittest.TestCase):
         command.upgrade(self.config, "head")
         self.assertTrue(inspect(self.connection).has_table("users"))
 
-    def test_admin_seed_is_repeatable_and_password_is_hashed(self):
+    def test_seed_creates_admin_and_demo_donor_once(self):
         command.upgrade(self.config, "head")
         self.connection.commit()
-        with patch.dict(os.environ, {"SEED_ADMIN_EMAIL": "Admin@PDMA.gov.pk", "SEED_ADMIN_NAME": "PDMA Admin"}):
-            self.assertEqual(seed_users("admin-test-password", self.connection), 1)
-            self.assertEqual(seed_users("another-test-password", self.connection), 0)
+        env = {"SEED_ADMIN_EMAIL": "Admin@PDMA.gov.pk", "SEED_ADMIN_NAME": "PDMA Admin", "APP_ENV": "development"}
+        shown = []
+        with patch.dict(os.environ, env):
+            os.environ.pop("SEED_DONOR_PASSWORD", None)
+            self.assertEqual(seed_users("admin-test-password", self.connection, echo=shown.append), 2)
+            self.assertEqual(seed_users("another-test-password", self.connection, echo=shown.append), 0)
+        self.assertEqual(len(shown), 1)  # the donor password is shown once
+        donor_password = shown[0].split(" / ")[1].split()[0]
+        self.assertTrue(donor_password.isdigit() and len(donor_password) == 12, donor_password)
         with Session(self.connection) as session:
-            users = session.scalars(select(User)).all()
-            self.assertEqual(len(users), 1)
-            admin = users[0]
-            self.assertEqual(admin.email, "admin@pdma.gov.pk")
+            users = {u.email: u for u in session.scalars(select(User)).all()}
+            self.assertEqual(set(users), {"admin@pdma.gov.pk", "donor.admin@demo.com"})
+            admin, donor = users["admin@pdma.gov.pk"], users["donor.admin@demo.com"]
             self.assertEqual(session.get(Role, admin.role_id).name, "ADMIN")
-            self.assertIsNone(admin.district_id)
+            self.assertEqual(session.get(Role, donor.role_id).name, "DONOR")
             self.assertIsNotNone(admin.email_verified_at)
             self.assertTrue(PasswordHash.recommended().verify("admin-test-password", admin.password))
+            self.assertTrue(PasswordHash.recommended().verify(donor_password, donor.password))
+            self.assertIsNotNone(session.scalar(select(DonorProfile).where(DonorProfile.user_id == donor.id)))
+
+    def test_seed_skips_demo_donor_in_production(self):
+        command.upgrade(self.config, "head")
+        self.connection.commit()
+        with patch.dict(os.environ, {"APP_ENV": "production"}):
+            self.assertEqual(seed_users("admin-test-password", self.connection, echo=lambda *_: None), 1)
 
     def test_seed_rejects_short_password(self):
         command.upgrade(self.config, "head")

@@ -1,17 +1,37 @@
 from fastapi import FastAPI,Depends,APIRouter
 import os
 import uvicorn
-from routes import auth_routes, health_routes
+from routes import auth_routes, donation_routes, donor_report_routes, fund_routes, health_routes, notification_routes
 from middlewares.auth_middleware import auth_middleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from controller.authentication import AuthFlowError
-app = FastAPI()
+import asyncio
+from contextlib import asynccontextmanager
+
+from config.database import engine
+from config.outbox import outbox_worker
+
+
+@asynccontextmanager
+async def lifespan(_app):
+    # Deliver queued emails (and retry failed ones) for the life of the process.
+    task = None if os.environ.get("DISABLE_OUTBOX_WORKER") else asyncio.create_task(outbox_worker(engine))
+    yield
+    if task:
+        task.cancel()
+
+
+app = FastAPI(lifespan=lifespan)
 api_router = APIRouter(prefix="/api")
 
 #  Public Routes that can have both public and protected routes
 api_router.include_router(auth_routes.router)
 api_router.include_router(health_routes.router)
+api_router.include_router(donation_routes.router)
+api_router.include_router(notification_routes.router)
+api_router.include_router(fund_routes.router)
+api_router.include_router(donor_report_routes.router)
 app.include_router(api_router)
 # Keep the existing portal's auth paths compatible with the MySQL backend.
 app.include_router(auth_routes.router, prefix="/api/v1", include_in_schema=False)

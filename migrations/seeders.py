@@ -1,46 +1,70 @@
-"""Seed the PDMA administrator account only. Repeatable: an existing account is never overwritten.
+"""Seed accounts. Repeatable: existing accounts are never overwritten.
 
-Settings (from .env or the shell):
-  SEED_ADMIN_EMAIL     default admin@pdma.gov.pk
-  SEED_ADMIN_NAME      default "PDMA Admin"
-  SEED_USER_PASSWORD   required, 12+ characters (artisan asks for it if not set)
+1. PDMA administrator (always)
+   SEED_ADMIN_EMAIL     default admin@pdma.gov.pk
+   SEED_ADMIN_NAME      default "PDMA Admin"
+   SEED_USER_PASSWORD   required, 12+ characters (artisan asks for it if not set)
 
-Other users register through the portal and get their role from this administrator.
+2. Demo donor (development only; skipped when APP_ENV=production)
+   donor.admin@demo.com with a random 12-digit numeric password, printed once when the account is created.
+   Set SEED_DONOR_PASSWORD to choose the password instead. The password is never written to a file.
 """
 import os
+import secrets
 
 from pwdlib import PasswordHash
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from config.database import engine
+from model.donation_model import DonorProfile
 from model.role_model import Role
 from model.user_model import User
 
-ADMIN_ROLE = "ADMIN"
+DEMO_DONOR_EMAIL = "donor.admin@demo.com"
 
 
-def seed_users(password, bind=None):
-    """Create the PDMA admin if missing. Returns the number of accounts created (0 or 1)."""
+def _create_user(session, hasher, email, name, password, role_name):
+    role_id = session.scalar(select(Role.id).where(Role.name == role_name))
+    if role_id is None:
+        raise ValueError("Run migrations before seeding users.")
+    if session.scalar(select(User.id).where(func.lower(User.email) == email)) is not None:
+        return None
+    user = User(
+        name=name,
+        email=email,
+        password=hasher.hash(password),
+        role_id=role_id,
+        district_id=None,
+        is_active=True,
+        # Seeded by the operator, so the address is trusted and the account can sign in straight away.
+        email_verified_at=func.now(),
+    )
+    session.add(user)
+    session.flush()
+    return user
+
+
+def seed_users(password, bind=None, echo=print):
+    """Create the PDMA admin and (outside production) the demo donor. Returns the number created."""
     if not password or len(password) < 12:
         raise ValueError("Seed password must contain at least 12 characters.")
-    email = (os.environ.get("SEED_ADMIN_EMAIL") or "admin@pdma.gov.pk").strip().lower()
-    name = (os.environ.get("SEED_ADMIN_NAME") or "PDMA Admin").strip()
-
+    hasher = PasswordHash.recommended()
+    created = 0
     with Session(bind or engine) as session, session.begin():
-        role_id = session.scalar(select(Role.id).where(Role.name == ADMIN_ROLE))
-        if role_id is None:
-            raise ValueError("Run migrations before seeding users.")
-        if session.scalar(select(User.id).where(func.lower(User.email) == email)) is not None:
-            return 0
-        session.add(User(
-            name=name,
-            email=email,
-            password=PasswordHash.recommended().hash(password),
-            role_id=role_id,
-            district_id=None,
-            is_active=True,
-            # Seeded by the operator, so the address is trusted; the admin can sign in straight away.
-            email_verified_at=func.now(),
-        ))
-    return 1
+        admin_email = (os.environ.get("SEED_ADMIN_EMAIL") or "admin@pdma.gov.pk").strip().lower()
+        admin_name = (os.environ.get("SEED_ADMIN_NAME") or "PDMA Admin").strip()
+        if _create_user(session, hasher, admin_email, admin_name, password, "ADMIN"):
+            created += 1
+
+        if (os.environ.get("APP_ENV") or "development").lower() != "production":
+            donor_password = os.environ.get("SEED_DONOR_PASSWORD") or f"{secrets.randbelow(10**12):012d}"
+            if len(donor_password) < 12:
+                raise ValueError("SEED_DONOR_PASSWORD must contain at least 12 characters.")
+            donor = _create_user(session, hasher, DEMO_DONOR_EMAIL, "Demo Donor", donor_password, "DONOR")
+            if donor:
+                session.add(DonorProfile(user_id=donor.id, organization="Demo Relief Foundation"))
+                created += 1
+                if not os.environ.get("SEED_DONOR_PASSWORD"):
+                    echo(f"Demo donor created: {DEMO_DONOR_EMAIL} / {donor_password} (shown once; store it safely)")
+    return created

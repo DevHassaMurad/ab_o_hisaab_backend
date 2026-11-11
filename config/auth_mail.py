@@ -85,8 +85,12 @@ class AuthMailer:
             raise MailDeliveryError("Email delivery is not configured.")
 
     def send(self, recipient, name, purpose, code=None):
-        self.ensure_configured()
         subject, text, html = render_email(name, purpose, code)
+        self.deliver(recipient, subject, text, html)
+
+    def deliver(self, recipient, subject, text, html):
+        """Send any rendered email (plain text + HTML) through the configured SMTP account."""
+        self.ensure_configured()
         message = EmailMessage()
         message["Subject"] = subject
         message["From"] = formataddr((os.environ.get("SMTP_FROM_NAME", "Aab o Hisaab"), os.environ["SMTP_FROM_EMAIL"]))

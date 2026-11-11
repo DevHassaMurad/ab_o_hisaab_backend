@@ -48,7 +48,7 @@ def main():
     commands.add_parser("migrate:reset", help="Undo all migrations (drops migrated tables/data)")
     commands.add_parser("migrate:status", help="Show current revision and migration history")
     commands.add_parser("migrate:baseline", help="Adopt the existing four-column users table without recreating it")
-    commands.add_parser("db:seed", help="Create the PDMA admin account without overwriting existing accounts")
+    commands.add_parser("db:seed", help="Create the PDMA admin (and the demo donor outside production) without overwriting accounts")
     make = commands.add_parser("make:migration", help="Create a migration with upgrade/downgrade functions")
     make.add_argument("name")
     make.add_argument("--autogenerate", action="store_true")
@@ -78,7 +78,7 @@ def main():
         if args.action == "db:seed" or (args.action == "migrate" and args.seed):
             from migrations.seeders import seed_users
             password = os.environ.get("SEED_USER_PASSWORD") or getpass("PDMA admin password (12+ characters): ")
-            print(f"Created {seed_users(password)} PDMA admin account(s); existing accounts unchanged.")
+            print(f"Created {seed_users(password)} account(s); existing accounts unchanged.")
     except Exception as exc:
         # Do not dump database connection URLs or passwords into CLI output.
         from sqlalchemy.exc import SQLAlchemyError
