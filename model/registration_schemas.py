@@ -67,6 +67,8 @@ class RegistrationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     verification_id: str = Field(min_length=36, max_length=36)
     verification_token: str = Field(min_length=40, max_length=100)
+    ngo_verification_id: str | None = Field(default=None, min_length=36, max_length=36)
+    ngo_verification_token: str | None = Field(default=None, min_length=40, max_length=100)
     user_type: UserType
     full_name: Annotated[
         str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)
@@ -119,6 +121,10 @@ class RegistrationRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_details(self):
+        if self.user_type == "ngo" and not (self.ngo_verification_id and self.ngo_verification_token):
+            raise ValueError("NGOs require identity and NGO certificate verification.")
+        if self.user_type != "ngo" and (self.ngo_verification_id or self.ngo_verification_token):
+            raise ValueError("NGO certificate verification is only for NGOs.")
         if self.password != self.confirm_password:
             raise ValueError("Passwords must match.")
         if self.identity_type == "cnic":

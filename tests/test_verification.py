@@ -218,11 +218,16 @@ class VerificationTests(unittest.TestCase):
             with self.subTest(kind=kind):
                 process = self.upload(kind).json()
                 self.fixture_pass(process)
-                response = self.register(process, kind)
+                extra = {}
+                if kind == "ngo":
+                    certificate = self.upload(kind, document_type="ngo_registration").json()
+                    self.fixture_pass(certificate)
+                    extra = {"ngo_verification_id": certificate["id"], "ngo_verification_token": certificate["verification_token"]}
+                response = self.register(process, kind, **extra)
                 self.assertEqual(response.status_code, 202, response.text)
                 body = response.json()
                 self.assertEqual(body["registration_status"], "under_review")
-                self.assertEqual(len(body["documents"]), 1)
+                self.assertEqual(len(body["documents"]), 2 if kind == "ngo" else 1)
                 doc = body["documents"][0]
                 self.assertEqual(doc["status"], "Pending")
                 self.assertIsNone(doc["approval_type"])
@@ -238,7 +243,7 @@ class VerificationTests(unittest.TestCase):
                 self.assertIsNotNone(self.db.get(model, user.id))
                 self.assertEqual(
                     self.register(
-                        process, kind, email=f"again-{kind}@example.org"
+                        process, kind, email=f"again-{kind}@example.org", **extra
                     ).status_code,
                     409,
                 )
@@ -496,7 +501,10 @@ class RealAgentTests(unittest.TestCase):
                 )
             )
             stages = []
-            result = DocumentVerificationAgent().analyze(
+            from agents.grok_extractor import Extraction
+            extraction = Extraction(document_type="cnic", text="PAKISTAN NATIONAL IDENTITY CARD\nName: TEST PERSON\nFather Name: TEST PARENT\nCNIC: 12345-1234567-1\nDate of Birth: 01 JAN 1990", identity_number="1234512345671")
+            with patch("agents.grok_extractor.extract", return_value=extraction):
+                result = DocumentVerificationAgent().analyze(
                 path,
                 "image/png",
                 "cnic",

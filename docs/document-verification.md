@@ -1,3 +1,11 @@
+# Grok document extraction update
+
+Documents are sent to xAI's vision API using server-only XAI_API_KEY and configurable XAI_DOCUMENT_MODEL. Responses are bounded, schema validated, and never treated as authenticity evidence. Do not put the key in frontend variables. No model training is performed.
+
+NGOs must supply two distinct capability-protected processes: verification_id/token for the selected CNIC/passport and ngo_verification_id/token for ngo_registration. Both must complete checks or enter manual review, and both are consumed atomically with registration.
+
+Set DOCUMENT_PASSPORT_MODE=extraction during dummy-document testing. This permits missing/invalid MRZ digits but still requires readable passport number and identity fields. It never automatically approves passports, even when auto-approval is enabled. Switch to strict to restore MRZ enforcement. Extraction success does not prove authenticity. xAI receives document images; disclose this processing to users.
+
 # Document verification and connection repair
 
 ## Connection diagnosis

@@ -100,10 +100,12 @@ def start_verification(
 
 @router.get("/documents/{document_id}/verification-status")
 def verification_status(
+    response: Response,
     document_id: str,
     verification_token: str | None = Header(None, alias="X-Verification-Token"),
     db: Session = Depends(get_db),
 ):
+    response.headers["Cache-Control"] = "no-store"
     return process_status(
         Verification(db).authorize(document_id, verification_token, allow_consumed=True)
     )

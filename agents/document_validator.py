@@ -1,6 +1,7 @@
 """Document-specific structural checks; matching text is never proof of authenticity."""
 
 import re
+import os
 
 
 def mrz_check(value):
@@ -86,9 +87,11 @@ def validate_content(kind, text, classification):
             or not checks["identity_fields_present"]
         ):
             issues.append("Passport number and identity fields must be readable.")
-        if mrz["present"] and not mrz["valid"]:
+        strict = os.environ.get("DOCUMENT_PASSPORT_MODE", "strict") != "extraction"
+        checks["strict_passport_checks"] = strict
+        if strict and mrz["present"] and not mrz["valid"]:
             issues.append("The readable passport MRZ check digits do not match.")
-        if not mrz["present"]:
+        if strict and not mrz["present"]:
             issues.append(
                 "A complete passport MRZ was not readable; manual review is required."
             )

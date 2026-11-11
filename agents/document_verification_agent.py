@@ -12,9 +12,8 @@ import os
 from cryptography.fernet import Fernet
 
 from agents.document_classifier import classify
-from agents.document_preprocessor import DocumentPreprocessor, decode_pages
+from agents.document_preprocessor import decode_pages
 from agents.document_validator import validate_content
-from agents.ocr_service import OCRService
 
 STAGES = ["scanning", "enhancing", "extracting", "validating", "completing"]
 
@@ -54,38 +53,30 @@ class DocumentVerificationAgent:
         pages = decode_pages(path, content_type)
         progress("scanning", True)
         progress("enhancing", False)
-        ocr = OCRService()
-        prepared, metrics, issues = [], [], []
-        preprocessor = DocumentPreprocessor()
-        for page in pages:
-            enhanced, quality, problems = preprocessor.prepare(
-                page, ocr.orientation(page)
-            )
-            prepared.append(enhanced)
-            metrics.append(quality)
-            issues.extend(problems)
         progress("enhancing", True)
         progress("extracting", False)
-        outputs = [ocr.extract(page) for page in prepared]
-        text = "\n".join(output["text"] for output in outputs)
-        word_count = sum(output["word_count"] for output in outputs)
-        confidence = sum(
-            output["confidence"] * output["word_count"] for output in outputs
-        ) / max(1, word_count)
+        from agents.grok_extractor import extract
+        output = extract(pages, document_type)
+        text = output.text
+        # Canonical labels let deterministic rules validate visible structured fields.
+        labels = {"identity_number": "Passport number" if document_type == "passport" else "CNIC", "surname": "Surname", "given_names": "Given names", "nationality": "Nationality", "date_of_birth": "Date of birth", "organization_name": "Organization name", "registration_number": "Registration number"}
+        for key, label in labels.items():
+            if getattr(output, key):
+                text += "\n" + label + ": " + getattr(output, key)
+        word_count = len(text.split())
+        metrics = []
+        issues = []
         progress("extracting", True)
         progress("validating", False)
         classification = classify(text)
         checks, extracted, validation_issues = validate_content(
             document_type, text, classification
         )
+        extracted.update({key: value for key, value in output.model_dump().items() if key not in ("text", "document_type", "extraction_source", "extraction_warning") and value is not None})
         issues.extend(validation_issues)
         if word_count < 12:
             issues.append("Not enough document text is readable for automated checks.")
-        if confidence < float(os.environ.get("DOCUMENT_MIN_OCR_CONFIDENCE", "45")):
-            issues.append("OCR confidence is too low; upload a clearer document.")
-        checks["layout_has_multiple_lines"] = (
-            sum(output["line_count"] for output in outputs) >= 3
-        )
+        checks["layout_has_multiple_lines"] = len(text.splitlines()) >= 3
         if not checks["layout_has_multiple_lines"]:
             issues.append("The expected document text layout could not be established.")
         authenticity = (
@@ -96,6 +87,7 @@ class DocumentVerificationAgent:
         passed = not issues
         approved = (
             passed
+            and not (document_type == "passport" and os.environ.get("DOCUMENT_PASSPORT_MODE") == "extraction")
             and authenticity["verified"]
             and os.environ.get("DOCUMENT_AUTO_APPROVE", "false").lower() == "true"
         )
@@ -105,9 +97,12 @@ class DocumentVerificationAgent:
             "automated_checks_passed": passed,
             "authenticity_verified": bool(authenticity["verified"]),
             "manual_review_required": not approved,
-            "engine": "OpenCV + Tesseract LSTM + document rules",
+            "engine": output.extraction_source + " + document rules",
+            "extraction_warning": output.extraction_warning,
+            "passport_mode": os.environ.get("DOCUMENT_PASSPORT_MODE", "strict"),
+            "extraction_only": document_type == "passport" and os.environ.get("DOCUMENT_PASSPORT_MODE") == "extraction",
             "trained_authenticity_model": False,
-            "ocr_confidence": round(confidence, 2),
+            "ocr_confidence": None,
             "word_count": word_count,
             "page_count": len(pages),
             "quality": metrics,

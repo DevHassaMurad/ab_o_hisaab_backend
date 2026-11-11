@@ -30,7 +30,15 @@ MANUAL_MESSAGE = "Your registration is under process. Your document has been sub
 
 
 def process_status(process):
+    details = {}
+    if process.stage == "completed" and process.extracted_data:
+        import json
+        from agents.document_verification_agent import cipher
+        allowed = {"identity_number", "surname", "given_names", "nationality", "date_of_birth", "expiry_date", "organization_name", "registration_number", "address"}
+        decoded = json.loads(cipher().decrypt(process.extracted_data.encode()))
+        details = {key: value for key, value in decoded.items() if key in allowed and isinstance(value, str)}
     return {
+        "extracted_details": details,
         "id": process.id,
         "document_type": process.document_type,
         "user_type": process.user_type,
@@ -113,6 +121,8 @@ class Verification:
                         "The verification session belongs to a different user type.",
                         422,
                     )
+                if process.document_type != document_type:
+                    raise AuthFlowError("DOCUMENT_TYPE_LOCKED", "The document type is fixed for this verification session. Return to account details to change your identity type.", 422)
                 if process.stage in ACTIVE_STAGES:
                     raise AuthFlowError(
                         "VERIFICATION_RUNNING",
@@ -135,7 +145,7 @@ class Verification:
                         VerificationProcess.created_at > now_utc() - timedelta(hours=1),
                     )
                 )
-                if recent >= int(os.environ.get("DOCUMENT_SESSIONS_PER_HOUR", "5")):
+                if recent >= int(os.environ.get("DOCUMENT_SESSIONS_PER_HOUR", "100")):
                     raise AuthFlowError(
                         "SESSION_LIMIT",
                         "Too many verification sessions. Please try again later.",
@@ -308,7 +318,7 @@ def run_verification(bind, process_id, attempt):
                     "automated_checks_passed": False,
                     "authenticity_verified": False,
                     "manual_review_required": True,
-                    "message": "Processing could not complete. Check document readability or try again; manual review is available after three attempts.",
+                    "message": str(exc) if isinstance(exc, ValueError) and str(exc).startswith(("Grok ", "Local OCR ")) else "Processing could not complete. Try again or request manual review after three attempts.",
                     "reasons": [
                         "The processing service could not safely complete this attempt."
                     ],
