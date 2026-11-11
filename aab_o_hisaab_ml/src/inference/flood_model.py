@@ -56,6 +56,42 @@ class FloodForecastModel:
             raise ValueError(f"Missing required feature columns: {missing}")
         return self.model.predict_proba(df[self.features])[:, 1]
 
+    def explain_decision(self, df_row: pd.DataFrame, top_k: int = 8) -> dict:
+        """Challenge C06 Regulatory XAI: Compute exact TreeSHAP attributions for a single district-day."""
+        import shap
+        if len(df_row) != 1:
+            df_row = df_row.iloc[[0]]
+        X = df_row[self.features]
+        prob = float(self.predict_proba(df_row)[0])
+        explainer = shap.TreeExplainer(self.model)
+        sv_raw = explainer.shap_values(X)
+        if isinstance(sv_raw, list):
+            sv = np.asarray(sv_raw[1])[0]
+            base_val = float(np.asarray(explainer.expected_value)[1])
+        elif sv_raw.ndim == 3:
+            sv = sv_raw[0, :, 1]
+            base_val = float(np.asarray(explainer.expected_value)[1])
+        else:
+            sv = sv_raw[0]
+            base_val = float(np.asarray(explainer.expected_value).ravel()[0])
+        order = np.argsort(np.abs(sv))[::-1][:top_k]
+        drivers = [
+            {
+                "feature": self.features[i],
+                "value": round(float(X.iloc[0, i]), 4),
+                "shap_delta_prob": round(float(sv[i]), 4),
+                "direction": "increases_risk" if sv[i] >= 0 else "decreases_risk",
+            }
+            for i in order
+        ]
+        return {
+            "base_prior_prob": round(base_val, 4),
+            "predicted_prob": round(prob, 4),
+            "threshold": round(self.threshold, 4),
+            "approved": bool(prob >= self.threshold),
+            "top_shap_drivers": drivers,
+        }
+
 
 class RiskEngine:
     """Converts model probabilities into 0-100 risk scores and PDMA funding tiers."""
