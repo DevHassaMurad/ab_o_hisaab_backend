@@ -1,0 +1,11 @@
+# FR6 defaults for new funds (Principle IX: config, not code). Amounts are demo values, not real allocations.
+fund_defaults:
+  allocated_pkr: "50000000.00"          # seeded for every active pilot district; replays use the same (FR5)
+  thresholds: {WATCH: 40, WARNING: 60, ACTION: 80}
+  increments: {WATCH: 10, WARNING: 30, ACTION: 60}   # D4: increments, sum 100
+  household_share_pct: 70
+  shopkeeper_cap_pkr: "50000.00"
+  shopkeeper_stock_pct: 40
+  household_amount_by_tier: {WATCH: "3000.00", WARNING: "7000.00", ACTION: "15000.00"}
+  event_close_days: 14
+  pool_spillover_enabled: true

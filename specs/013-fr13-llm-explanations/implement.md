@@ -90,28 +90,28 @@ Check `resp.usage.cache_read_input_tokens` in logs: it should be > 0 from the se
 
 ### Roadmap: guardrails (`app/services/explain/guardrails.py`)
 ```python
-_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩٫", "01234567890123456789.")
-_NUM = re.compile(r"\d+(?:[.,٬]\d+)*")
+_DIGITS = str.maketrans("\u06f0\u06f1\u06f2\u06f3\u06f4\u06f5\u06f6\u06f7\u06f8\u06f9\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669\u066b", "01234567890123456789.")
+_NUM = re.compile(r"\d+(?:[.,\u066c]\d+)*")
 _WORDS_EN = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8,
              "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "fourteen": 14, "fifteen": 15, "twenty": 20,
              "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
              "hundred": 100}
-_WORDS_UR = {"ایک": 1, "دو": 2, "تین": 3, "چار": 4, "پانچ": 5, "چھ": 6, "سات": 7, "آٹھ": 8, "نو": 9, "دس": 10,
-             "بیس": 20, "تیس": 30, "سو": 100}
-_SCALE = {"thousand": 1_000, "ہزار": 1_000, "lakh": 100_000, "لاکھ": 100_000, "million": 1_000_000}
+_WORDS_UR = {"[Urdu text]": 1, "[Urdu text]": 2, "[Urdu text]": 3, "[Urdu text]": 4, "[Urdu text]": 5, "[Urdu text]": 6, "[Urdu text]": 7, "[Urdu text]": 8, "[Urdu text]": 9, "[Urdu text]": 10,
+             "[Urdu text]": 20, "[Urdu text]": 30, "[Urdu text]": 100}
+_SCALE = {"thousand": 1_000, "[Urdu text]": 1_000, "lakh": 100_000, "[Urdu text]": 100_000, "million": 1_000_000}
 TIER_LABELS = {"en": {"NONE": "Normal", "WATCH": "Watch", "WARNING": "Warning", "ACTION": "Action"},
-               "ur": {"NONE": "معمول", "WATCH": "نگرانی", "WARNING": "انتباہ", "ACTION": "کارروائی"}}
+               "ur": {"NONE": "[Urdu text]", "WATCH": "[Urdu text]", "WARNING": "[Urdu text]", "ACTION": "[Urdu text]"}}
 
 def normalise_digits(s: str) -> str:
     return s.translate(_DIGITS)
 
 def extract_numbers(text: str) -> list[Decimal]:
     t = normalise_digits(text)
-    tokens = re.findall(r"\d+(?:[.,٬]\d+)*|[^\W\d_]+", t)
+    tokens = re.findall(r"\d+(?:[.,\u066c]\d+)*|[^\W\d_]+", t)
     out: list[Decimal] = []
     for i, tok in enumerate(tokens):
         if tok[0].isdigit():
-            v = Decimal(tok.replace(",", "").replace("٬", ""))
+            v = Decimal(tok.replace(",", "").replace("\u066c", ""))
         elif tok.lower() in _WORDS_EN or tok in _WORDS_UR:
             v = Decimal(_WORDS_EN.get(tok.lower(), _WORDS_UR.get(tok, 0)))
         else:
@@ -149,7 +149,7 @@ def check(text: str, *, template: str, facts: dict, kind: str, language: str, ti
     if any(lbl in text for t, lbl in labels.items() if t != tier and lbl != labels[tier]):
         v.append("TIER_MISMATCH")
     letters = [c for c in text if c.isalpha()]
-    arabic = sum("؀" <= c <= "ۿ" for c in letters) / max(1, len(letters))
+    arabic = sum("\u0600" <= c <= "\u06ff" for c in letters) / max(1, len(letters))
     if (language == "ur" and arabic < 0.60) or (language == "en" and arabic > 0.05):
         v.append("WRONG_LANGUAGE")
     if len(text) > max(int(1.5 * len(template)), 300):
@@ -290,4 +290,4 @@ Not in the 3-minute replay (flag off; replays offline). Optional Q&A slide: one 
 - Urdu text mixes scripts (district names in Latin script); tune the 60% threshold on the eval set, not by intuition.
 - Never log the full allocation facts at INFO level; they are not identifying but are personal.
 - Contextvars (scenario, clock) must be copied into worker threads.
-- The tier-label check is conservative: ordinary words such as "action" or "معمول" (normal) can cause false `TIER_MISMATCH` rejections; so can Urdu number words that are also common words (`دو` "give", `سو` "sleep", `نو`). Measure on the eval set and drop words from the lists if rejections are mostly false.
+- The tier-label check is conservative: ordinary words such as "action" or the Urdu word for "normal" can cause false `TIER_MISMATCH` rejections; so can Urdu number words that are also common words (`[Urdu text]` "give" "sleep"). Measure on the eval set and drop words from the lists if rejections are mostly false.

@@ -198,7 +198,7 @@ DC scoping: in the router, resolve the district (from the tehsil if given) and c
 Labels:
 ```python
 LABEL_EN = "Precomputed from real Sentinel-1 radar images captured on {date}. Permanent water removed."
-LABEL_UR = "یہ نقشہ {date} کی اصل سینٹینل-1 ریڈار تصاویر سے پہلے سے تیار کیا گیا ہے۔ مستقل پانی شامل نہیں۔"
+LABEL_UR = "[Urdu text]"
 LIVE_EN  = "Detected from Sentinel-1 radar captured on {date}. Permanent water removed."   # roadmap rows
 ```
 

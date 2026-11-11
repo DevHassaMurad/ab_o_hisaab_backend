@@ -191,7 +191,7 @@ Roles: `PDMA_OFFICER`, `ADMIN`, `DC` (own district only). Query: `purpose`, `sta
       "channel": "WHATSAPP",
       "language": "UR_EN",
       "template_key": "payment_notice",
-      "message_text": "آب و حساب: 15,000 روپے …\n\nAab o Hisaab: Rs 15,000 …",
+      "message_text": "[Urdu text]",
       "status": "DELIVERED",
       "error_code": null,
       "provider_message_id": "SM1f0e…",
@@ -254,7 +254,7 @@ Roles: `PDMA_OFFICER`, `ADMIN`.
       "expects_reply": true,
       "variables": ["amount", "wallet_ur", "wallet_en", "ref"],
       "content_sid_configured": false,
-      "sample": "آب و حساب: 15,000 روپے …\n\nAab o Hisaab: Rs 15,000 …"
+      "sample": "[Urdu text]"
     }
   ]
 }

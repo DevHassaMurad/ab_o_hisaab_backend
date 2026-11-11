@@ -1,0 +1,88 @@
+{
+ "type": "Feature",
+ "geometry": {
+  "type": "Point",
+  "coordinates": [
+   67.4,
+   26.8,
+   211.68
+  ]
+ },
+ "properties": {
+  "parameter": {
+   "PRECTOTCORR": {
+    "20220820": 19.86,
+    "20220821": 34.33,
+    "20220822": 1.76,
+    "20220823": 53.24,
+    "20220824": 126.78,
+    "20220825": -999.0,
+    "20220826": 1.65
+   },
+   "T2M": {
+    "20220820": 27.78,
+    "20220821": 27.96,
+    "20220822": 28.13,
+    "20220823": 26.94,
+    "20220824": 28.23,
+    "20220825": 28.07,
+    "20220826": 27.91
+   },
+   "GWETROOT": {
+    "20220820": 0.99,
+    "20220821": 0.98,
+    "20220822": 0.98,
+    "20220823": 0.98,
+    "20220824": 1.0,
+    "20220825": 1.0,
+    "20220826": -999.0
+   },
+   "GWETTOP": {
+    "20220820": 0.96,
+    "20220821": 0.97,
+    "20220822": 0.96,
+    "20220823": 0.97,
+    "20220824": 0.98,
+    "20220825": 0.98,
+    "20220826": 0.97
+   }
+  }
+ },
+ "header": {
+  "title": "NASA/POWER Source Native Resolution Daily Data",
+  "api": {
+   "version": "v2.10.3",
+   "name": "POWER Daily API"
+  },
+  "sources": [
+   "MERRA2"
+  ],
+  "fill_value": -999.0,
+  "time_standard": "UTC",
+  "start": "20220820",
+  "end": "20220826"
+ },
+ "messages": [],
+ "parameters": {
+  "PRECTOTCORR": {
+   "units": "mm/day",
+   "longname": "Precipitation Corrected"
+  },
+  "T2M": {
+   "units": "C",
+   "longname": "Temperature at 2 Meters"
+  },
+  "GWETROOT": {
+   "units": "1",
+   "longname": "Root Zone Soil Wetness"
+  },
+  "GWETTOP": {
+   "units": "1",
+   "longname": "Surface Soil Wetness"
+  }
+ },
+ "times": {
+  "data": 0.488,
+  "process": 0.01
+ }
+}

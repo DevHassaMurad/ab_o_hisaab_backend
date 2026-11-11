@@ -90,7 +90,7 @@ UTF-8 (BOM allowed), comma delimiter, `"` quoting, header row required, one bene
 | `register_ref` | yes | 1–64 chars `[A-Za-z0-9_-]`, unique in file | `DADU-HH-000123` |
 | `type` | yes | `HOUSEHOLD` \| `SHOPKEEPER` | `HOUSEHOLD` |
 | `tehsil_pcode` | yes | existing tehsil in an active district | `PK60501` |
-| `name` | yes | 2–120 chars, Urdu or Latin | `غلام رسول` |
+| `name` | yes | 2–120 chars, Urdu or Latin | Ghulam Rasool |
 | `phone` | yes | PK mobile, normalised to `+923XXXXXXXXX` | `0301-2345678` |
 | `cnic` | no | 13 digits, dashes optional | `41101-1234567-1` |
 | `wallet_provider` | yes | `JAZZCASH` \| `EASYPAISA` \| `NONE` | `JAZZCASH` |
@@ -154,7 +154,7 @@ DONOR → 403 `FORBIDDEN_ROLE` on every route above.
       "register_ref": "SYN-PK60501-H-00042",
       "type": "HOUSEHOLD",
       "tehsil": {"id": "…", "pcode": "PK60501", "name": "Dadu"},
-      "name": "غلام رسول",
+      "name": "Ghulam Rasool",
       "phone_masked": "+92300*****67",
       "cnic_masked": "*****-*******-3",
       "wallet_provider": "JAZZCASH",

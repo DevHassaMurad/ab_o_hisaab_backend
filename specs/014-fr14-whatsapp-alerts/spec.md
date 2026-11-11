@@ -40,7 +40,7 @@ When a payment becomes Paid, the household or shopkeeper gets a WhatsApp message
 
 **Acceptance Scenarios**:
 
-1. **Given** a simulated payment of PKR 15 000 to a JazzCash wallet becomes Paid, **When** the payment notice is enqueued, **Then** the text says "15,000 روپے" and "Rs 15,000", names JazzCash in both languages, tells the person to reply 1 or 2, and ends with the demo label.
+1. **Given** a simulated payment of PKR 15 000 to a JazzCash wallet becomes Paid, **When** the payment notice is enqueued, **Then** the text says "Rs 15,000", names JazzCash, tells the person to reply 1 or 2, and ends with the demo label.
 2. **Given** the same payment notice was already enqueued, **When** the Paid hook runs again (a retry or re-run), **Then** no second alert is created.
 3. **Given** a beneficiary whose phone is already flagged invalid, **When** a payment notice is enqueued, **Then** the alert is stored as `FAILED` with error `PHONE_INVALID` and no provider call is made.
 
@@ -139,17 +139,17 @@ All messages are Urdu first, a blank line, then English. Beneficiary messages us
 
 ### Shared lines
 
-| Key | Urdu | English |
-|---|---|---|
-| `line.demo` | (آزمائشی پیغام، یہ اصل رقم نہیں ہے) | (DEMO message, this is not real money) |
-| `wallet.JAZZCASH` | جاز کیش | JazzCash |
-| `wallet.EASYPAISA` | ایزی پیسہ | Easypaisa |
-| `tier.WATCH` | نگرانی | Watch |
-| `tier.WARNING` | خبردار | Warning |
-| `tier.ACTION` | فوری خطرہ | Action |
-| `purpose.WATCH` | کشتیاں اور خوراک پہلے سے پہنچانا | Preposition boats and food |
-| `purpose.WARNING` | لوگوں کا انخلا اور کیمپ کھولنا | Evacuate, open camps |
-| `purpose.ACTION` | نقد امداد | Cash support |
+| Key | English |
+|---|---|
+| `line.demo` | (DEMO message, this is not real money) |
+| `wallet.JAZZCASH` | JazzCash |
+| `wallet.EASYPAISA` | Easypaisa |
+| `tier.WATCH` | Watch |
+| `tier.WARNING` | Warning |
+| `tier.ACTION` | Action |
+| `purpose.WATCH` | Preposition boats and food |
+| `purpose.WARNING` | Evacuate, open camps |
+| `purpose.ACTION` | Cash support |
 
 `line.demo` is appended to every beneficiary message when the beneficiary, release or payment is simulated (NFR13).
 
@@ -159,38 +159,34 @@ Composed as: header + advice for the beneficiary type + amount line (only when f
 
 **Headers**
 
-| Tier | Urdu | English |
-|---|---|---|
-| WATCH | آب و حساب: اگلے {lead_days} دن میں {district_ur} میں سیلاب کا خطرہ ہے۔ (نگرانی) | Aab o Hisaab: Flood risk in {district} in the next {lead_days} days. (Watch) |
-| WARNING | آب و حساب: {district_ur} میں سیلاب کا بڑا خطرہ ہے۔ (خبردار) | Aab o Hisaab: High flood risk in {district}. (Warning) |
-| ACTION | آب و حساب: {district_ur} میں سیلاب آنے والا ہے۔ (فوری خطرہ) | Aab o Hisaab: A flood is coming to {district}. (Action) |
+| Tier | English |
+|---|---|
+| WATCH | Aab o Hisaab: Flood risk in {district} in the next {lead_days} days. (Watch) |
+| WARNING | Aab o Hisaab: High flood risk in {district}. (Warning) |
+| ACTION | Aab o Hisaab: A flood is coming to {district}. (Action) |
 
 **Advice lines**
 
-| Tier | Type | Urdu | English |
-|---|---|---|---|
-| WATCH | HOUSEHOLD | شناختی کارڈ، دوائی، پانی اور خشک کھانا ایک تھیلے میں تیار رکھیں۔ | Keep ID cards, medicine, water and dry food ready in one bag. |
-| WATCH | SHOPKEEPER | دکان کا قیمتی سامان اونچی جگہ رکھنے کا انتظام کریں۔ | Plan to move valuable shop stock to a high place. |
-| WARNING | HOUSEHOLD | بچوں، بزرگوں اور مویشیوں کو اونچی جگہ لے جانے کی تیاری کریں۔ سرکاری اعلانات سنیں۔ | Get ready to move children, elders and animals to high ground. Listen to official announcements. |
-| WARNING | SHOPKEEPER | دکان کا سامان اونچی یا محفوظ جگہ پر منتقل کریں۔ کاغذات اپنے ساتھ رکھیں۔ | Move shop stock to a high or safe place. Keep your papers with you. |
-| ACTION | HOUSEHOLD | ابھی اونچی جگہ یا سرکاری کیمپ میں چلے جائیں۔ بہتے پانی میں نہ چلیں۔ | Go to high ground or a government camp now. Do not walk in flowing water. |
-| ACTION | SHOPKEEPER | دکان بند کریں اور اونچی جگہ چلے جائیں۔ آپ کی جان سامان سے زیادہ قیمتی ہے۔ | Close the shop and go to high ground. Your life matters more than stock. |
+| Tier | Type | English |
+|---|---|---|
+| WATCH | HOUSEHOLD | Keep ID cards, medicine, water and dry food ready in one bag. |
+| WATCH | SHOPKEEPER | Plan to move valuable shop stock to a high place. |
+| WARNING | HOUSEHOLD | Get ready to move children, elders and animals to high ground. Listen to official announcements. |
+| WARNING | SHOPKEEPER | Move shop stock to a high or safe place. Keep your papers with you. |
+| ACTION | HOUSEHOLD | Go to high ground or a government camp now. Do not walk in flowing water. |
+| ACTION | SHOPKEEPER | Close the shop and go to high ground. Your life matters more than stock. |
 
 **Amount lines**
 
-| Key | When | Urdu | English |
-|---|---|---|---|
-| `amount.wallet` | Funded, has a wallet, release not pending approval | آپ کو {amount} روپے آپ کے {wallet_ur} اکاؤنٹ میں بھیجے جائیں گے۔ | You will get Rs {amount} in your {wallet_en} account. |
-| `amount.no_wallet` | Funded, `wallet_provider = NONE` | آپ کے لیے {amount} روپے منظور ہوئے ہیں۔ رقم لینے کے لیے ڈی سی دفتر سے رابطہ کریں۔ | Rs {amount} has been approved for you. Contact the DC office to collect it. |
-| (none) | `UNMET_NEED`, or Action pending approval | — | — |
+| Key | When | English |
+|---|---|---|
+| `amount.wallet` | Funded, has a wallet, release not pending approval | You will get Rs {amount} in your {wallet_en} account. |
+| `amount.no_wallet` | Funded, `wallet_provider = NONE` | Rs {amount} has been approved for you. Contact the DC office to collect it. |
+| (none) | `UNMET_NEED`, or Action pending approval | — |
 
 **Full example** (`tier_alert.WARNING.HOUSEHOLD`, funded, simulated):
 
 ```text
-آب و حساب: دادو میں سیلاب کا بڑا خطرہ ہے۔ (خبردار)
-بچوں، بزرگوں اور مویشیوں کو اونچی جگہ لے جانے کی تیاری کریں۔ سرکاری اعلانات سنیں۔
-آپ کو 7,000 روپے آپ کے جاز کیش اکاؤنٹ میں بھیجے جائیں گے۔
-(آزمائشی پیغام، یہ اصل رقم نہیں ہے)
 
 Aab o Hisaab: High flood risk in Dadu. (Warning)
 Get ready to move children, elders and animals to high ground. Listen to official announcements.
@@ -203,11 +199,6 @@ You will get Rs 7,000 in your JazzCash account.
 The only beneficiary message that asks for a reply (`expects_reply = true`).
 
 ```text
-آب و حساب: {amount} روپے آپ کے {wallet_ur} اکاؤنٹ میں بھیج دیے گئے ہیں۔
-رقم {wallet_ur} ایجنٹ کی دکان یا ایپ سے نکالیں۔
-یہ رقم مفت ہے۔ کسی کو فیس یا اپنا پن نہ دیں۔
-رقم مل گئی تو 1 بھیجیں۔ نہیں ملی تو 2 بھیجیں۔
-حوالہ: {ref}
 [line.demo]
 
 Aab o Hisaab: Rs {amount} has been sent to your {wallet_en} account.
@@ -225,11 +216,6 @@ Ref: {ref}
 `dc.tier_change.up` (Watch or Warning, released automatically):
 
 ```text
-آب و حساب | ضلع {district_ur}
-خطرہ {score}/100۔ نیا درجہ: {tiers_ur}۔
-جاری رقم: {release_amount} روپے ({release_pct}%)۔
-مقصد: {purposes_ur}۔
-تفصیل: {link}
 
 Aab o Hisaab | {district} district
 Risk {score}/100. New tier: {tiers_en}.
@@ -241,12 +227,7 @@ Details: {link}
 `dc.tier_change.up_pending` (Action fired; lower tiers in the same run are listed as released):
 
 ```text
-آب و حساب | ضلع {district_ur}
-خطرہ {score}/100۔ درجہ: فوری خطرہ۔
-{action_amount} روپے ({action_pct}%) آپ کی منظوری کے بعد جاری ہوں گے۔
-منظوری کا پیغام الگ سے آ رہا ہے۔
 {released_line_ur}
-تفصیل: {link}
 
 Aab o Hisaab | {district} district
 Risk {score}/100. Tier: Action.
@@ -256,14 +237,11 @@ A separate approval message follows.
 Details: {link}
 ```
 
-`{released_line_*}` is empty, or "پہلے سے جاری: {amount} روپے ({tiers_ur})" / "Already released: Rs {amount} ({tiers_en})".
+`{released_line_*}` is empty, or "Already released: Rs {amount} ({tiers_en})".
 
 `dc.tier_change.down`:
 
 ```text
-آب و حساب | ضلع {district_ur}
-خطرہ کم ہو کر {score}/100 ہو گیا ہے (اب: {tier_ur})۔
-جاری شدہ رقم واپس نہیں لی جائے گی۔ باقی رقم فنڈ میں رہے گی۔
 
 Aab o Hisaab | {district} district
 Risk fell to {score}/100 (now: {tier_en}).
@@ -273,8 +251,6 @@ Money already released is not taken back. The rest stays in the fund.
 `dc.event_closed`:
 
 ```text
-آب و حساب | ضلع {district_ur}
-{days} دن سے خطرہ کم ہے۔ یہ سیلابی واقعہ بند کر دیا گیا ہے۔
 
 Aab o Hisaab | {district} district
 Risk has stayed low for {days} days. This flood event is now closed.
@@ -283,15 +259,7 @@ Risk has stayed low for {days} days. This flood event is now closed.
 ### APPROVAL_REQUEST to the DC (`dc.approval_request`)
 
 ```text
-آب و حساب | منظوری درکار
-ضلع {district_ur}: خطرہ {score}/100 (فوری خطرہ)۔
-رقم: {amount} روپے، {beneficiary_count} افراد کے لیے۔
-وجہ: {explanation_ur}
-منظوری کے لیے یہ بھیجیں:
 APPROVE {code}
-رد کرنے کے لیے یہ بھیجیں:
-REJECT وجہ
-کوڈ {expires_pkt} تک درست ہے۔ تفصیل: {link}
 
 Aab o Hisaab | Approval needed
 {district} district: risk {score}/100 (Action tier).
@@ -311,11 +279,6 @@ Code valid until {expires_pkt} PKT. Details: {link}
 `escalation.pdma` to each active PDMA officer (D6):
 
 ```text
-آب و حساب | توجہ
-ضلع {district_ur} کی فوری رقم ({amount} روپے) کی منظوری {waited_h} گھنٹے سے رکی ہوئی ہے۔
-ڈی سی نے ابھی جواب نہیں دیا۔
-صرف ڈی سی منظوری دے سکتا ہے۔ براہ کرم ڈی سی سے رابطہ کریں۔
-تفصیل: {link}
 
 Aab o Hisaab | Attention
 The Action release for {district} (Rs {amount}) has waited {waited_h} hours for approval.
@@ -327,8 +290,6 @@ Details: {link}
 `escalation.dc_reminder` to the DC:
 
 ```text
-آب و حساب | یاد دہانی
-ضلع {district_ur} کی فوری رقم کی منظوری ابھی باقی ہے۔ پی ڈی ایم اے کو اطلاع دے دی گئی ہے۔
 {code_line_ur}
 
 Aab o Hisaab | Reminder
@@ -336,15 +297,11 @@ The Action release for {district} still needs your decision. PDMA has been infor
 {code_line_en}
 ```
 
-`{code_line_*}` is "منظوری: APPROVE {code}" / "To approve: APPROVE {code}" when FR8 supplies a fresh code, otherwise "ڈیش بورڈ پر فیصلہ کریں: {link}" / "Decide on the dashboard: {link}".
+`{code_line_*}` is "APPROVE {code}" / "To approve: APPROVE {code}" when FR8 supplies a fresh code, otherwise "Decide on the dashboard: {link}".
 
 ### DECISION_NOTICE to the PDMA officer (`pdma.approval_rejected`, `pdma.approval_approved`)
 
 ```text
-آب و حساب | ضلع {district_ur}
-ڈی سی نے فوری رقم ({amount} روپے) رد کر دی ہے۔
-وجہ: {reason}
-رقم فنڈ میں موجود ہے۔ تفصیل: {link}
 
 Aab o Hisaab | {district} district
 The DC rejected the Action release (Rs {amount}).
@@ -353,8 +310,6 @@ The money stays in the fund. Details: {link}
 ```
 
 ```text
-آب و حساب | ضلع {district_ur}
-ڈی سی نے فوری رقم ({amount} روپے) منظور کر دی ہے۔ ادائیگیاں شروع ہو رہی ہیں۔
 
 Aab o Hisaab | {district} district
 The DC approved the Action release (Rs {amount}). Payments are starting.
@@ -363,9 +318,6 @@ The DC approved the Action release (Rs {amount}). Payments are starting.
 ### OUTCOME_SURVEY placeholder (`outcome_survey.q1`, owned by 022, behind `FR22_OUTCOME`)
 
 ```text
-آب و حساب: کیا اس رقم سے سیلاب سے پہلے آپ کو مدد ملی؟
-ہاں تو 1 بھیجیں۔ نہیں تو 2 بھیجیں۔
-آپ کا نام کسی کو نہیں بتایا جائے گا۔
 
 Aab o Hisaab: Did this money help you before the flood?
 Reply 1 for yes. Reply 2 for no.

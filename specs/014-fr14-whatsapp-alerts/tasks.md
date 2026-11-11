@@ -39,7 +39,7 @@ description: "Task list for FR14 WhatsApp alerts"
 ### Tests first
 
 - [ ] T005 [P] Unit test catalogue rendering (Urdu block first, blank line, English block; strict missing-variable error `TemplateContextMissing`; `line.demo` appended when `simulated`) in `tests/unit/messaging/test_templates.py`
-- [ ] T006 [P] Unit lint test over every catalogue key: renders with sample context; beneficiary blocks ≤ 6 lines and ≤ 60 words per language; blocklist words absent (`tier`, `allocation`, `disbursement`, `beneficiary`, `تخصیص`); no `{name}`, `{phone}`, `{cnic}`, `{wallet_id}` variables; Urdu block contains Arabic-script characters, in `tests/unit/messaging/test_catalogue_lint.py`
+- [ ] T006 [P] Unit lint test over every catalogue key: renders with sample context; beneficiary blocks ≤ 6 lines and ≤ 60 words per language; blocklist words absent (`tier`, `allocation`, `disbursement`, `beneficiary`); no `{name}`, `{phone}`, `{cnic}`, `{wallet_id}` variables; Urdu block contains Arabic-script characters, in `tests/unit/messaging/test_catalogue_lint.py`
 - [ ] T007 [P] Unit test dedupe key builders for every row of plan.md "Dedupe keys" in `tests/unit/messaging/test_dedupe.py`
 - [ ] T008 [P] Unit test allowlist gate: `dry_run` never calls Twilio; `twilio` mode calls Twilio only for allowlisted numbers or (flag on and non-simulated beneficiary) in `tests/unit/messaging/test_allowlist.py`
 - [ ] T009 [P] Unit test `classify_twilio_error` for each code in plan.md table plus timeout and 5xx in `tests/unit/messaging/test_error_classification.py`
@@ -95,7 +95,7 @@ description: "Task list for FR14 WhatsApp alerts"
 
 ### Tests for User Story 2
 
-- [ ] T030 [P] [US2] Integration test `notify_payment_paid`: text has `15,000 روپے`, `Rs 15,000`, wallet names, `{ref}` = 8 upper-case chars of payment id, demo label for simulated; `expects_reply=true`; `triggered_at=paid_at`; second call → same alert; phone flagged invalid → `FAILED/PHONE_INVALID` without a provider call, in `tests/integration/messaging/test_notify_helpers.py`
+- [ ] T030 [P] [US2] Integration test `notify_payment_paid`: text has `Rs 15,000`, wallet names, `{ref}` = 8 upper-case chars of payment id, demo label for simulated; `expects_reply=true`; `triggered_at=paid_at`; second call → same alert; phone flagged invalid → `FAILED/PHONE_INVALID` without a provider call, in `tests/integration/messaging/test_notify_helpers.py`
 
 ### Implementation for User Story 2
 

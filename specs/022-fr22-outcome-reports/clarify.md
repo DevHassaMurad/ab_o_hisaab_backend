@@ -15,7 +15,7 @@
   - Q3 `helped` (both): "How much did this money help?" 1 A lot, 2 A little, 3 Not at all.
   Why: answers the donor's question ("did anticipatory cash change behaviour?") with codes that aggregate cleanly and carry no personal details.
 - Q: Free text? → A: No. Free text can contain names, places and phone numbers, which would need moderation before any donor use. Roadmap+ at most.
-- Q: How are replies parsed? → A: Normalise Urdu `۰–۹` and Arabic-Indic `٠–٩` to `0–9` (reuse FR15's normaliser), take the first digit in the message, check it is a valid option. Invalid → one re-ask ("Please reply with a number from the list"); second invalid → store `null` for that question and move on.
+- Q: How are replies parsed? → A: Normalise Urdu `0–9` (Urdu digits) and Arabic-Indic `0–9` (Arabic-Indic digits) to `0–9` (reuse FR15's normaliser), take the first digit in the message, check it is a valid option. Invalid → one re-ask ("Please reply with a number from the list"); second invalid → store `null` for that question and move on.
 - Q: When does a survey expire? → A: 72 hours after the last message sent with no reply (`OUTCOME_SURVEY_EXPIRY_HOURS`). Partial answers are kept and counted per question.
 - Q: When can messages be sent? → A: Survey starts only between 09:00 and 19:00 Asia/Karachi (`OUTCOME_SEND_WINDOW`); follow-up questions are sent immediately after a reply, at any time.
 - Q: How are aggregates anonymised? → A: District × beneficiary type × event only. k-anonymity with **k = 5**: any cell with fewer than 5 respondents for a question is returned as `suppressed=true` with no numbers. No tehsil breakdown in the roadmap build. Percentages are rounded to whole numbers in stories and one decimal in aggregates.

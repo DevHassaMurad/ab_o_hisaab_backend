@@ -1,0 +1,5 @@
+# FR4 default flood mode per province, plus per-district overrides. Seeding is initial config (not audited);
+# later changes go through PATCH /api/v1/districts/{id}/flood-mode (audited).
+province_defaults: {SINDH: SLOW_ONSET, KP: FLASH, PUNJAB: SLOW_ONSET, BALOCHISTAN: FLASH, GB: FLASH, AJK: FLASH, ICT: FLASH}
+validated_provinces: [SINDH, KP]
+overrides: []          # e.g. - {pcode: "PK-KP-NWS", mode: SLOW_ONSET, note: "riverine (Kabul river)"}

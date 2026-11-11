@@ -1,0 +1,20 @@
+mode: SLOW_ONSET
+spec_version: 1
+mode_dir: slow_onset
+description: "Rain that builds over days on flat, saturated land (Sindh)."
+artifact_version: current            # or a pinned version string
+features: [rain_3d_mm, rain_7d_mm, rain_14d_mm, rain_30d_mm, rain_fcst_target_mm,
+           soil_wetness_root, soil_wetness_top, elevation_mean_m, vulnerability_weight, lead_day]
+monotone: {rain_3d_mm: 1, rain_7d_mm: 1, rain_14d_mm: 1, rain_30d_mm: 1, rain_fcst_target_mm: 1,
+           soil_wetness_root: 1, soil_wetness_top: 1, vulnerability_weight: 1}
+lead_weights: {1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0, 5: 1.0, 6: 1.0, 7: 1.0}
+lead_focus: {WATCH: 7, WARNING: 4, ACTION: 2}     # target lead (days) used by the report and backtests
+label: {min_flooded_pct: 2.0}
+calibration: {method: isotonic, min_positives: 50, false_alarm_budget: {WATCH: 3.0, WARNING: 1.5, ACTION: 0.5}}
+fallback:
+  version: rules-fallback-1
+  terms:
+    - {feature: rain_7d_mm,           weight: 0.45, ref: 150}
+    - {feature: rain_30d_mm,          weight: 0.25, ref: 300}
+    - {feature: soil_wetness_root,    weight: 0.20, ref: 1.0}
+    - {feature: vulnerability_weight, weight: 0.10, ref: 1.0}

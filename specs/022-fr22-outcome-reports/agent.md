@@ -108,7 +108,7 @@ tests/contract/test_outcomes_donor_scope.py
 **Roadmap build**
 - [ ] Migration 0022 applied after the foundation owner merges the proposed fields
 - [ ] Survey sent once per beneficiary per event, N days after the last PAID payment, inside the send window
-- [ ] Replies parsed (incl. `۱`, `١`), re-ask once, completion and expiry audited
+- [ ] Replies parsed (incl. `1` (Urdu digits), `1` (Arabic-Indic digits)), re-ask once, completion and expiry audited
 - [ ] Aggregates with k = 5 suppression; stories EN/UR; donor contract test passes
 - [ ] Simulated responses script works for `sindh-2022` and `buner-2025`
 

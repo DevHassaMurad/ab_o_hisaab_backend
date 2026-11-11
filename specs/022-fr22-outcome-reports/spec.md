@@ -39,7 +39,7 @@ Seven days after a beneficiary's last payment in a flood event, they receive a W
 **Acceptance Scenarios**:
 
 1. **Given** household H's last payment in the event was PAID 7 days ago and H has no open payment notice, **When** the survey job runs inside the send window, **Then** one survey starts (intro plus question 1) and an audit entry `OUTCOME_SURVEY_SENT` is written.
-2. **Given** H replies `۱` to question 1, **When** the reply arrives, **Then** it is stored as `evacuated = yes` and question 2 is sent.
+2. **Given** H replies `1` (Urdu digits) to question 1, **When** the reply arrives, **Then** it is stored as `evacuated = yes` and question 2 is sent.
 3. **Given** H replies `hello` to question 2, **When** the reply arrives, **Then** H gets one re-ask; a second invalid reply stores no answer for question 2 and moves on to question 3.
 4. **Given** H answers question 3, **When** the reply arrives, **Then** the report is `COMPLETED`, a thank-you message is queued, and `OUTCOME_REPORT_COMPLETED` is audited.
 5. **Given** H already has a survey for this event, **When** the job runs again, **Then** no second survey is sent.
@@ -114,7 +114,7 @@ The PDMA officer sees survey progress per district: sent, in progress, completed
 - **FR22-002**: System MUST answer every outcome route with "feature disabled" when the flag is off.
 - **FR22-003**: When the flag is on, System MUST start at most one survey per beneficiary per trigger event, a configurable number of days (default 7) after the beneficiary's last PAID payment in that event, only inside the send window, only for valid phones, and only when no payment notice is awaiting a reply.
 - **FR22-004**: System MUST send questions one at a time, Urdu first then English, answerable with a single digit, using the beneficiary-type-specific first question.
-- **FR22-005**: System MUST accept Western, Urdu (`۰–۹`) and Arabic-Indic (`٠–٩`) digits, use the first digit in the reply, re-ask once on an invalid reply, and record no answer after a second invalid reply.
+- **FR22-005**: System MUST accept Western, Urdu (`0–9` (Urdu digits)) and Arabic-Indic (`0–9` (Arabic-Indic digits)) digits, use the first digit in the reply, re-ask once on an invalid reply, and record no answer after a second invalid reply.
 - **FR22-006**: System MUST store answers as coded values with the raw reply and time, and mark the report completed after the last question.
 - **FR22-007**: System MUST expire surveys with no reply for a configurable period (default 72 hours) and keep partial answers.
 - **FR22-008**: System MUST NOT collect free text, names, locations or photos in the survey.

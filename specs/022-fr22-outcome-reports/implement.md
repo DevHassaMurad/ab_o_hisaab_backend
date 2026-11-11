@@ -155,7 +155,7 @@ QUESTIONS_V1 = {
 _FIRST_DIGIT = re.compile(r"\d")
 
 def parse_answer(q: Question, body: str) -> ParsedAnswer:
-    text = normalise_digits(body or "")            # FR15: ۰-۹ and ٠-٩ -> 0-9
+    text = normalise_digits(body or "")            # FR15: \u06f0-\u06f9 and \u0660-\u0669 -> 0-9
     m = _FIRST_DIGIT.search(text)
     if not m or int(m.group()) not in q.options:
         return ParsedAnswer(valid=False, raw=body)
@@ -285,8 +285,8 @@ Shares are rounded independently, so they may sum to 99.9–100.1; the test allo
 ### Stories (`stories.py`)
 
 ```python
-SPEND_UR = {"FOOD": "کھانے", "TRANSPORT": "سفر یا نقل مکانی", "SHELTER": "رہائش", "MEDICINE": "دوا",
-            "SHOP_GOODS": "دکان یا مال", "OTHER": "دوسری ضروریات"}
+SPEND_UR = {"FOOD": "[Urdu text]", "TRANSPORT": "[Urdu text]", "SHELTER": "[Urdu text]", "MEDICINE": "[Urdu text]",
+            "SHOP_GOODS": "[Urdu text]", "OTHER": "[Urdu text]"}
 SPEND_EN = {"FOOD": "food", "TRANSPORT": "transport or moving", "SHELTER": "shelter", "MEDICINE": "medicine",
             "SHOP_GOODS": "the shop or goods", "OTHER": "other needs"}
 

@@ -20,9 +20,9 @@
 ### Reply parser (`reply_parser.py`)
 
 ```python
-_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789")
+_DIGITS = str.maketrans("\u06f0\u06f1\u06f2\u06f3\u06f4\u06f5\u06f6\u06f7\u06f8\u06f9\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669", "01234567890123456789")
 _MARKS = re.compile(r"[​-‏‪-‮⁦-⁩﻿]")
-_TRAIL = " .۔!؟?،,"
+_TRAIL = " .\u06d4!\u061f?\u060c,"
 _DIGIT_TOKEN = re.compile(r"\d+")
 _COMMAND = re.compile(r"^(approve|reject)\b", re.IGNORECASE)
 
@@ -57,7 +57,7 @@ def is_command(text: str | None) -> bool:
     return bool(_COMMAND.match(normalise(text)))
 ```
 
-Note `1.` → `normalise` strips the trailing dot → `1`. `1 2` → two digit tokens → unparseable. `۱۲` → `12` → first token is `12` → unparseable.
+Note `1.` → `normalise` strips the trailing dot → `1`. `1 2` → two digit tokens → unparseable. `12` (Urdu digits) → `12` → first token is `12` → unparseable.
 
 ### Routing (`inbound.py`)
 
@@ -226,8 +226,8 @@ Silent alerts are re-scanned each run; cap the scan with `sent_at >= now - 2 × 
 |---|---|---|
 | `RECEIPT_REPLY_WINDOW_DAYS` | 7 | Open-notice window |
 | `RECEIPT_KEYWORDS_ENABLED` | `true` | Exact whole-message match only |
-| `RECEIPT_YES_KEYWORDS` | `ہاں,جی,جی ہاں,مل گیا,مل گئے,مل گئی,haan,han,ji,yes,mil gaya,mil gaye,received` | Lower-cased, normalised |
-| `RECEIPT_NO_KEYWORDS` | `نہیں,نہیں ملا,نہیں ملے,nahi,nahin,nai,no,nahi mila,not received` | |
+| `RECEIPT_YES_KEYWORDS` | Urdu words from the translation file, plus the Roman Urdu list in spec.md | Lower-cased, normalised |
+| `RECEIPT_NO_KEYWORDS` | Urdu words from the translation file, plus the Roman Urdu list in spec.md | |
 | `RECEIPT_HELP_THROTTLE_MIN` | 10 | One help reply per phone per window |
 | `SIM_REPLY_INTERVAL_S` | 30 | Job interval |
 | `SIM_REPLY_DELAY_S` | 20 | Wait after `sent_at` before simulating |
@@ -244,7 +244,7 @@ pytest -q tests/unit/messaging/test_reply_parser.py tests/unit/messaging/test_co
 pytest -q tests/integration/messaging -k "inbound or receipt or simulated"
 pytest -q tests/contract/test_inbound_webhook.py tests/contract/test_confirmations_api.py
 # Manual signed request (dev), using the FR14 helper:
-python -c "from tests.integration.messaging.conftest import print_signed_curl; print_signed_curl('/api/v1/webhooks/whatsapp', {'MessageSid':'SMtest1','From':'whatsapp:+923001234567','Body':'۱'})"
+python -c "from tests.integration.messaging.conftest import print_signed_curl; print_signed_curl('/api/v1/webhooks/whatsapp', {'MessageSid':'SMtest1','From':'whatsapp:+923001234567','Body':'\u06f1'})"
 ```
 
 ## Verification checklist
@@ -270,7 +270,7 @@ python -c "from tests.integration.messaging.conftest import print_signed_curl; p
 
 ## Demo notes
 
-- After the DC approves (live `APPROVE <code>` from the DC phone, routed here to FR8) and payments go Paid, the hero shopkeeper's phone gets the payment notice. The presenter replies `۱` on an Urdu keyboard; the dashboard flips the receipt to Confirmed and the audit log shows `RECEIPT_CONFIRMED`.
+- After the DC approves (live `APPROVE <code>` from the DC phone, routed here to FR8) and payments go Paid, the hero shopkeeper's phone gets the payment notice. The presenter replies `1` (Urdu digits) on an Urdu keyboard; the dashboard flips the receipt to Confirmed and the audit log shows `RECEIPT_CONFIRMED`.
 - The replay's other beneficiaries get labelled simulated replies, so the donor report shows "received" as a realistic share, with the simulated badge.
 - Backup if the venue network fails: FR5's `REPLAY_SIM` approval and the dashboard OTP still work; FR15 is not on that path.
 
@@ -279,7 +279,7 @@ python -c "from tests.integration.messaging.conftest import print_signed_curl; p
 - **Signature with form bodies**: read the form once in the dependency and pass the dict on; Starlette's request body cannot be read twice.
 - **Same phone, two roles**: always test commands before digits. A DC who is also the hero beneficiary must still be able to reply `1`.
 - **NFKC does not fold Arabic-script digits**: keep the explicit translation table.
-- **Python `str.isdigit()` is true for `۱`**: never use it to decide ASCII-ness; normalise first.
+- **Python `str.isdigit()` is true for `1` (Urdu digits)**: never use it to decide ASCII-ness; normalise first.
 - **Advisory lock scope**: use `pg_advisory_xact_lock` (released at commit/rollback), not the session-level lock.
 - **FR8 errors**: rollback first, then open a **new** transaction for the `ERROR` ack, otherwise the ack is rolled back too.
 - **Old open notices**: a reply with no new notice could confirm a week-old payment. The 7-day window limits this; tune it with the PDMA.

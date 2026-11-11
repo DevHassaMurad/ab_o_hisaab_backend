@@ -42,7 +42,7 @@ The approval request on WhatsApp includes an approval code. The DC replies `APPR
 
 1. **Given** a pending approval, **When** the DC replies `APPROVE <code>` with the right code, **Then** it is approved with channel WhatsApp and the DC gets a confirmation with the amount.
 2. **Given** the DC replies with a wrong code, **When** handled, **Then** nothing is approved and the reply says how many attempts are left; after 5 wrong codes the WhatsApp code is locked and the DC is pointed to the dashboard.
-3. **Given** the reply uses Urdu digits (`APPROVE ۴۸۲۹۱۳`) or the Urdu keywords (`منظور`, `مسترد`), **When** handled, **Then** it is understood the same way.
+3. **Given** the reply uses Urdu digits (`APPROVE 482913` (Urdu digits)) or the Urdu words for approve and reject, **When** handled, **Then** it is understood the same way.
 4. **Given** the same WhatsApp message is delivered twice, **When** handled, **Then** the second delivery changes nothing.
 5. **Given** a message from a number that is not a registered DC, **When** handled, **Then** nothing changes.
 

@@ -14,17 +14,17 @@
 
 ### User Story 1 - Beneficiary confirms receipt with one digit (Priority: P1)
 
-A household or shopkeeper gets the payment notice (FR14) and replies `1` because the money arrived. They may type it on an Urdu keyboard (`۱`) or an Arabic keyboard (`١`). The system matches the phone to their latest payment notice, marks the receipt Confirmed, writes an audit entry and thanks them in Urdu and English (UC10 steps 2–3).
+A household or shopkeeper gets the payment notice (FR14) and replies `1` because the money arrived. They may type it on an Urdu keyboard (`1` (Urdu digits)) or an Arabic keyboard (`1` (Arabic-Indic digits)). The system matches the phone to their latest payment notice, marks the receipt Confirmed, writes an audit entry and thanks them in Urdu and English (UC10 steps 2–3).
 
 **Why this priority**: "An approved payment is not money received." This is the only signal that money actually reached the person, and the donor report's "received" figure depends on it (FR19).
 
-**Independent Test**: Create a sent `PAYMENT_NOTICE` alert for a beneficiary, post a signed inbound message `Body=۱` from their number, and check one `Confirmation` with status `CONFIRMED`, one `RECEIPT_CONFIRMED` audit entry and one queued `receipt.ack.confirmed` reply.
+**Independent Test**: Create a sent `PAYMENT_NOTICE` alert for a beneficiary, post a signed inbound message `Body=1` (Urdu digits) from their number, and check one `Confirmation` with status `CONFIRMED`, one `RECEIPT_CONFIRMED` audit entry and one queued `receipt.ack.confirmed` reply.
 
 **Acceptance Scenarios**:
 
 1. **Given** a payment notice sent to +923001234567 an hour ago, **When** that number replies `1`, **Then** a `CONFIRMED` confirmation is linked to that alert and payment, an audit entry is written, and a thank-you reply is queued.
-2. **Given** the same notice, **When** the reply is `۱`, `١`, `１`, ` 1 `, `1.` or `1 shukriya`, **Then** it is treated exactly like `1`.
-3. **Given** the same notice, **When** the reply is `2` or `۲`, **Then** a `NOT_RECEIVED` confirmation is recorded and the reply says the report is recorded and will be checked.
+2. **Given** the same notice, **When** the reply is `1` (Urdu digits), `1` (Arabic-Indic digits), `１`, ` 1 `, `1.` or `1 shukriya`, **Then** it is treated exactly like `1`.
+3. **Given** the same notice, **When** the reply is `2` or `2` (Urdu digits), **Then** a `NOT_RECEIVED` confirmation is recorded and the reply says the report is recorded and will be checked.
 4. **Given** a beneficiary who replied `2`, **When** they later reply `1`, **Then** a second confirmation row is added and the effective status for the payment becomes `CONFIRMED`.
 5. **Given** two payment notices to the same beneficiary, **When** they reply `1`, **Then** the confirmation attaches to the most recent one.
 
@@ -40,8 +40,8 @@ The DC replies to the approval request with `APPROVE 482913` or `REJECT water is
 
 **Acceptance Scenarios**:
 
-1. **Given** an active DC user with phone +923331112222, **When** a message `approve ۴۸۲۹۱۳` arrives from that number, **Then** the FR8 handler gets `approve 482913` (digits normalised), the DC user and the message id.
-2. **Given** the handler returns `APPROVED`, **When** the reply is rendered, **Then** the DC gets "منظوری درج ہو گئی …" then "Approval recorded …".
+1. **Given** an active DC user with phone +923331112222, **When** a message `approve 482913` (Urdu digits) arrives from that number, **Then** the FR8 handler gets `approve 482913` (digits normalised), the DC user and the message id.
+2. **Given** the handler returns `APPROVED`, **When** the reply is rendered, **Then** the DC gets "Approval recorded …" (Urdu translation first).
 3. **Given** the handler returns `INVALID_CODE`, **When** the reply is rendered, **Then** the DC is told the code is wrong and how to send it again.
 4. **Given** `APPROVE 482913` comes from a beneficiary's number, **When** it arrives, **Then** it is never passed to the approval handler; it is handled as an unparseable receipt reply.
 5. **Given** `APPROVE 482913` comes from a PDMA officer's number, **When** it arrives, **Then** the handler is not called and the officer is told only the DC can approve (D6).
@@ -118,7 +118,7 @@ During a replay, thousands of payment notices go to synthetic beneficiaries thro
 
 ### Edge Cases
 
-- **Digits and marks**: ASCII `1`/`2`, Extended Arabic-Indic `۱`/`۲` (Urdu keyboards), Arabic-Indic `١`/`٢`, full-width `１`/`２`; leading/trailing spaces, RLM/LRM/zero-width/BOM marks, trailing punctuation (`.`, `۔`, `!`, `؟`, `،`).
+- **Digits and marks**: ASCII `1`/`2`, Extended Arabic-Indic `1` (Urdu digits)/`2` (Urdu digits) (Urdu keyboards), Arabic-Indic `1` (Arabic-Indic digits)/`2` (Arabic-Indic digits), full-width `１`/`２`; leading/trailing spaces, RLM/LRM/zero-width/BOM marks, trailing punctuation (`.`, `U+06D4 (Urdu full stop)`, `!`, `U+061F (Arabic question mark)`, `U+060C (Arabic comma)`).
 - **Ambiguous**: `12`, `1 2`, `21`, `3`, `0`, empty body → unparseable.
 - **Words**: exact-match keywords only (see Reply grammar); "mil gaya" counts, "kab milega?" does not.
 - **Quick-reply buttons** (production): a button payload `RECEIPT_YES` / `RECEIPT_NO` is used before the body.
@@ -138,12 +138,12 @@ During a replay, thousands of payment notices go to synthetic beneficiaries thro
 |---|---|
 | First token is `1` and no other digit token | `CONFIRMED` |
 | First token is `2` and no other digit token | `NOT_RECEIVED` |
-| Whole message equals a "yes" keyword: `ہاں`, `جی`, `جی ہاں`, `مل گیا`, `مل گئے`, `مل گئی`, `haan`, `han`, `ji`, `yes`, `mil gaya`, `mil gaye`, `received` | `CONFIRMED` |
-| Whole message equals a "no" keyword: `نہیں`, `نہیں ملا`, `نہیں ملے`, `nahi`, `nahin`, `nai`, `no`, `nahi mila`, `not received` | `NOT_RECEIVED` |
+| Whole message equals a "yes" keyword: `haan`, `han`, `ji`, `yes`, `mil gaya`, `mil gaye`, `received` | `CONFIRMED` |
+| Whole message equals a "no" keyword: `nahi`, `nahin`, `nai`, `no`, `nahi mila`, `not received` | `NOT_RECEIVED` |
 | Button payload `RECEIPT_YES` / `RECEIPT_NO` | `CONFIRMED` / `NOT_RECEIVED` |
 | Anything else, including media-only | `UNPARSEABLE` |
 
-Normalisation: Unicode NFKC; map `۰–۹` and `٠–٩` to `0–9`; remove U+200B–U+200F, U+202A–U+202E, U+2066–U+2069, U+FEFF; collapse whitespace; trim; strip trailing `.`, `۔`, `!`, `؟`, `?`, `،`, `,`; lower-case Latin.
+Normalisation: Unicode NFKC; map `0–9` (Urdu digits) and `0–9` (Arabic-Indic digits) to `0–9`; remove U+200B–U+200F, U+202A–U+202E, U+2066–U+2069, U+FEFF; collapse whitespace; trim; strip trailing `.`, `U+06D4 (Urdu full stop)`, `!`, `U+061F (Arabic question mark)`, `?`, `U+060C (Arabic comma)`, `,`; lower-case Latin.
 
 A DC **command** is a message whose first word, case-insensitive, is `APPROVE` or `REJECT`.
 
@@ -151,29 +151,29 @@ A DC **command** is a message whose first word, case-insensitive, is `APPROVE` o
 
 All Urdu first, then English (NFR10). Purpose `REPLY_ACK`.
 
-| Key | Urdu | English |
-|---|---|---|
-| `receipt.ack.confirmed` | شکریہ۔ آپ نے بتایا کہ رقم مل گئی ہے۔ یہ درج کر لیا گیا ہے۔ | Thank you. You said you got the money. This is recorded. |
-| `receipt.ack.not_received` | افسوس ہے۔ آپ نے بتایا کہ رقم نہیں ملی۔ یہ درج کر لیا گیا ہے اور اس کی جانچ کی جائے گی۔ حوالہ: {ref} | Sorry. You said you did not get the money. This is recorded and will be checked. Ref: {ref} |
-| `receipt.help` | براہ کرم صرف ایک نمبر بھیجیں: رقم مل گئی تو 1، نہیں ملی تو 2۔ | Please send just one number: 1 if you got the money, 2 if not. |
-| `receipt.no_open_notice` | آپ کا پیغام مل گیا۔ اس وقت آپ کی کوئی ادائیگی جواب کی منتظر نہیں ہے۔ | We got your message. No payment is waiting for your reply right now. |
+| Key | English |
+|---|---|
+| `receipt.ack.confirmed` | Thank you. You said you got the money. This is recorded. |
+| `receipt.ack.not_received` | Sorry. You said you did not get the money. This is recorded and will be checked. Ref: {ref} |
+| `receipt.help` | Please send just one number: 1 if you got the money, 2 if not. |
+| `receipt.no_open_notice` | We got your message. No payment is waiting for your reply right now. |
 
 DC and official replies. **Reconciled 2026-11-10**: FR8 owns this wording and returns it as `DcCommandResult.reply_text`, which FR15 forwards unchanged through the `dc.passthrough` template. The texts below are the reference wording FR8 should use for each outcome (FR8 outcome names: `CODE_INVALID`, `CODE_EXPIRED`, `CODE_LOCKED`, `NO_OPEN_APPROVAL`, …):
 
-| Key | Urdu | English |
-|---|---|---|
-| `dc.approval_result.APPROVED` | منظوری درج ہو گئی۔ ضلع {district_ur} کے لیے {amount} روپے کی ادائیگیاں شروع ہو رہی ہیں۔ | Approval recorded. Payments of Rs {amount} for {district} are starting. |
-| `dc.approval_result.REJECTED` | انکار درج ہو گیا۔ وجہ: {reason}۔ رقم فنڈ میں رہے گی اور پی ڈی ایم اے کو اطلاع دے دی گئی ہے۔ | Rejection recorded. Reason: {reason}. The money stays in the fund and PDMA has been informed. |
-| `dc.approval_result.INVALID_CODE` | کوڈ درست نہیں۔ باقی کوششیں: {attempts_left}۔ دوبارہ بھیجیں: | Wrong code. Attempts left: {attempts_left}. Send again: |
-| | APPROVE اور 6 ہندسوں کا کوڈ | APPROVE and the 6-digit code |
-| `dc.approval_result.CODE_EXPIRED` | کوڈ کی مدت ختم ہو چکی ہے۔ نیا کوڈ ڈیش بورڈ پر یا نئے پیغام میں ملے گا۔ | The code has expired. A new code is on the dashboard or in a new message. |
-| `dc.approval_result.NO_OPEN_APPROVAL` | اس وقت آپ کے ضلع کی کوئی منظوری زیر التوا نہیں ہے۔ | No approval is waiting for your district right now. |
-| `dc.approval_result.ALREADY_DECIDED` | اس درخواست کا فیصلہ پہلے ہی ہو چکا ہے۔ | This request has already been decided. |
-| `dc.approval_result.REASON_REQUIRED` | رد کرنے کی وجہ بھی لکھیں، مثال کے طور پر: | Please add a reason, for example: |
-| | REJECT پانی کم ہو رہا ہے | REJECT water is falling |
-| `dc.approval_result.ERROR` | معذرت، ابھی فیصلہ درج نہیں ہو سکا۔ براہ کرم ڈیش بورڈ استعمال کریں: {link} | Sorry, we could not record this now. Please use the dashboard: {link} |
-| `dc.help` | آب و حساب: منظوری کے لیے بھیجیں: APPROVE کوڈ — رد کرنے کے لیے بھیجیں: REJECT وجہ | Aab o Hisaab: to approve, send APPROVE <code>. To reject, send REJECT <reason>. |
-| `official.not_authorised` | صرف متعلقہ ضلع کا ڈی سی منظوری دے سکتا ہے۔ | Only the district's DC can approve. |
+| Key | English |
+|---|---|
+| `dc.approval_result.APPROVED` | Approval recorded. Payments of Rs {amount} for {district} are starting. |
+| `dc.approval_result.REJECTED` | Rejection recorded. Reason: {reason}. The money stays in the fund and PDMA has been informed. |
+| `dc.approval_result.INVALID_CODE` | Wrong code. Attempts left: {attempts_left}. Send again: |
+| | APPROVE and the 6-digit code |
+| `dc.approval_result.CODE_EXPIRED` | The code has expired. A new code is on the dashboard or in a new message. |
+| `dc.approval_result.NO_OPEN_APPROVAL` | No approval is waiting for your district right now. |
+| `dc.approval_result.ALREADY_DECIDED` | This request has already been decided. |
+| `dc.approval_result.REASON_REQUIRED` | Please add a reason, for example: |
+| | REJECT water is falling |
+| `dc.approval_result.ERROR` | Sorry, we could not record this now. Please use the dashboard: {link} |
+| `dc.help` | Aab o Hisaab: to approve, send APPROVE <code>. To reject, send REJECT <reason>. |
+| `official.not_authorised` | Only the district's DC can approve. |
 
 (Two-row entries are one message with a line break; the command line stands alone so right-to-left layout does not reorder it.)
 

@@ -1,0 +1,41 @@
+# Pilot districts and tehsils (Sindh + KP).
+#
+# PROVISIONAL DATA - replace before the pilot:
+# - pcodes are provisional ("PK-SD-DAD"), not OCHA COD-AB P-codes. When COD-AB adm2/adm3 boundaries are loaded,
+#   update the pcodes, then rebuild the replay caches (their file names use the pcode).
+# - centroids are approximate district centres (good enough for the NASA POWER 0.5 x 0.625 degree grid).
+#   They are replaced by ST_PointOnSurface(geom) once boundaries are loaded.
+# - vulnerability_weight is a neutral 0.5 until the context indicator refresh computes it (FR1 US4).
+districts:
+  - {pcode: PK-SD-DAD, name: Dadu, province: SINDH, lat: 26.80, lon: 67.40, active: true,
+     tehsils: [Dadu, Johi, Mehar, Khairpur Nathan Shah]}
+  - {pcode: PK-SD-LRK, name: Larkana, province: SINDH, lat: 27.55, lon: 68.15, active: true,
+     tehsils: [Larkana, Ratodero, Dokri, Bakrani]}
+  - {pcode: PK-SD-QSK, name: Qambar Shahdadkot, province: SINDH, lat: 27.60, lon: 67.65, active: true,
+     tehsils: [Qambar, Shahdadkot, Miro Khan]}
+  - {pcode: PK-SD-JCB, name: Jacobabad, province: SINDH, lat: 28.30, lon: 68.45, active: true,
+     tehsils: [Jacobabad, Thul, Garhi Khairo]}
+  - {pcode: PK-SD-KHP, name: Khairpur, province: SINDH, lat: 26.95, lon: 69.30, active: true,
+     tehsils: [Khairpur, Gambat, Kingri]}
+  - {pcode: PK-SD-SGR, name: Sanghar, province: SINDH, lat: 26.05, lon: 69.25, active: true,
+     tehsils: [Sanghar, Shahdadpur, Sinjhoro]}
+  - {pcode: PK-SD-MPK, name: Mirpurkhas, province: SINDH, lat: 25.55, lon: 69.05, active: true,
+     tehsils: [Mirpurkhas, Digri, Kot Ghulam Muhammad]}
+  - {pcode: PK-SD-JMS, name: Jamshoro, province: SINDH, lat: 25.95, lon: 67.80, active: true,
+     tehsils: [Kotri, Sehwan, Manjhand]}
+  - {pcode: PK-SD-SKP, name: Shikarpur, province: SINDH, lat: 27.95, lon: 68.65, active: false,
+     tehsils: [Shikarpur, Lakhi, Garhi Yasin]}
+  - {pcode: PK-SD-NSF, name: Naushahro Feroze, province: SINDH, lat: 26.85, lon: 68.10, active: false,
+     tehsils: [Naushahro Feroze, Moro, Kandiaro]}
+  - {pcode: PK-KP-BNR, name: Buner, province: KP, lat: 34.50, lon: 72.50, active: true,
+     tehsils: [Daggar, Gagra, Khudu Khel, Chamla]}
+  - {pcode: PK-KP-SWT, name: Swat, province: KP, lat: 35.20, lon: 72.45, active: true,
+     tehsils: [Babuzai, Kabal, Matta]}
+  - {pcode: PK-KP-SHG, name: Shangla, province: KP, lat: 34.85, lon: 72.75, active: true,
+     tehsils: [Alpuri, Puran, Bisham]}
+  - {pcode: PK-KP-CHR, name: Charsadda, province: KP, lat: 34.20, lon: 71.75, active: true,
+     tehsils: [Charsadda, Tangi, Shabqadar]}
+  - {pcode: PK-KP-NWS, name: Nowshera, province: KP, lat: 33.95, lon: 72.00, active: true,
+     tehsils: [Nowshera, Pabbi, Jehangira]}
+  - {pcode: PK-KP-PSH, name: Peshawar, province: KP, lat: 34.00, lon: 71.55, active: false,
+     tehsils: [Peshawar City, Mathra, Badaber]}

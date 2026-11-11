@@ -49,7 +49,7 @@ Add `POST /api/v1/webhooks/whatsapp` to the webhooks router created by FR14. Eac
 | Advisory lock on `hashtext(MessageSid)` + existence check of `Confirmation.provider_message_id` or `Alert.dedupe_key='ACK:{sid}'` | Concurrent duplicates serialise; the "processed" marker commits with the effect | A separate `InboundMessage` table (new entity, guide forbids); relying on Twilio not to duplicate |
 | Append-only confirmations; effective status = latest valid | Every reply is evidence; corrections are natural; one unique key per reply | Upsert one row per alert (a late retry of an old message could revert a newer answer) |
 | Empty TwiML + queued acks | Every outbound message is an audited `Alert` with delivery status | TwiML `<Message>` replies (not tracked, not audited) |
-| Explicit digit translation table + NFKC + mark stripping | NFKC does not fold `۱`/`١` to `1`; RLM marks are common in Urdu keyboards | Regex `\d` alone (Python matches Unicode digits, but `int()` and comparisons then vary; explicit is clearer) |
+| Explicit digit translation table + NFKC + mark stripping | NFKC does not fold `1` (Urdu digits)/`1` (Arabic-Indic digits) to `1`; RLM marks are common in Urdu keyboards | Regex `\d` alone (Python matches Unicode digits, but `int()` and comparisons then vary; explicit is clearer) |
 | First-token rule with "no other digit token" | Accepts "1 shukriya"; rejects "12", "1 2" | Whole-message equality only (too strict for real users) |
 | Route commands before receipts | The same demo phone may be both DC and hero beneficiary | Separate numbers (not possible on one sandbox) |
 | Call FR8 inside FR15's transaction | Decision, ack and idempotency marker commit together | Fire-and-forget to FR8 (could lose the ack or double-apply) |
@@ -151,7 +151,7 @@ Roles: `PDMA_OFFICER`, `ADMIN`, `DC` (own district via `Alert.district_id`). Que
       "beneficiary_id": "1b7d4f0a-2c55-4e8b-9f0e-4b2f8f1f6d21",
       "status": "CONFIRMED",
       "channel": "WHATSAPP",
-      "reply_preview": "۱",
+      "reply_preview": "\u06f1",
       "received_at": "2026-11-10T06:05:41Z",
       "provider_message_id": "SM9a1c…",
       "recorded_by": null,

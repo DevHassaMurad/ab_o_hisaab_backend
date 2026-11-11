@@ -134,7 +134,7 @@ Roles: DC (own district), PDMA_OFFICER, ADMIN.
                          {"tier": "WARNING", "amount_pkr": "15000000.00", "status": "RELEASED"}]},
   "risk": {"risk_index_id": "ri…", "run_date": "2026-11-12", "score": 86, "tier": "ACTION", "peak_lead_day": 2,
            "explanation_en": "Very heavy rain expected in 2 days; soil already saturated…",
-           "explanation_ur": "دو دن میں بہت شدید بارش متوقع ہے…",
+           "explanation_ur": "[Urdu text]",
            "top_factors": [{"factor": "rain_3d_mm", "value": 142, "contribution": 0.38}],
            "is_fallback": false, "is_stale_input": false},
   "latest_risk": {"run_date": "2026-11-12", "score": 86, "tier": "ACTION"},
@@ -261,15 +261,14 @@ Contract with FR15:
 - FR15 sends `reply_text` back to the sender (TwiML `<Message>` in the webhook response).
 - The handler never raises for user errors; it returns an outcome. It raises only on infrastructure errors (FR15 returns 500 so Twilio retries; idempotency covers the retry).
 
-Grammar (after NFKC, digit normalisation `۰-۹`/`٠-٩` → `0-9`, whitespace collapse, case-fold):
+Grammar (after NFKC, digit normalisation `0-9` (Urdu digits)/`0-9` (Arabic-Indic digits) → `0-9`, whitespace collapse, case-fold):
 
 | Input | Parsed |
 |---|---|
-| `APPROVE 482913`, `approve 482 913`, `منظور ۴۸۲۹۱۳` | APPROVE, code 482913 |
+| `APPROVE 482913`, `approve 482 913` | APPROVE, code 482913 |
 | `APPROVE` | APPROVE, code None → `CODE_INVALID` reply with usage |
 | `REJECT camps already open` | REJECT, reason |
 | `REJECT 482913 camps already open` | REJECT, code, reason |
-| `مسترد پانی کم ہو رہا ہے` | REJECT, reason |
 | anything else | `None` |
 
 ## Escalation job

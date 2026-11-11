@@ -39,7 +39,7 @@ Every rephrasing is checked before it is stored for display. Any number not pres
 **Acceptance Scenarios**:
 
 1. **Given** inputs with score 82 and rain 184 mm, **When** the rephrasing says "190 mm", **Then** it is rejected with reason "number not in inputs" and the template is shown.
-2. **Given** the rephrasing writes the score in Urdu digits (۸۲), **When** checked, **Then** it is accepted.
+2. **Given** the rephrasing writes the score in Urdu digits (82 (Urdu digits)), **When** checked, **Then** it is accepted.
 3. **Given** the inputs' tier is Warning, **When** the rephrasing says Action, **Then** it is rejected.
 4. **Given** the Urdu rephrasing is mostly English, **When** checked, **Then** it is rejected.
 5. **Given** the rephrasing omits the score, **When** checked, **Then** it is rejected.
@@ -111,7 +111,7 @@ With `FR13_LLM` off, the system makes no model calls and all explanation endpoin
 
 - The model returns the template unchanged: accepted (it passes all checks) and stored; display looks the same.
 - The model writes "two days" instead of "2 days": number words are converted and checked like digits.
-- The model writes "15,000" or "15 ہزار" for 15000: separators and thousand/lakh words are normalised before the check.
+- The model writes "15,000" or "15 hazaar" (in Urdu) for 15000: separators and thousand/lakh words are normalised before the check.
 - A date written as "24 August" when the input has 2022-08-24: day, month number, month name and year are allowed tokens.
 - Percent factors: the input stores 0.91 and the template shows 91; both 0.91 and 91 are allowed.
 - The model refuses (stop reason refusal) or stops at the token limit: template, status Error with the stop reason.

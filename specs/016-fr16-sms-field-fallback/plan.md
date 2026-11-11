@@ -135,7 +135,7 @@ Roles: `PDMA_OFFICER`, `ADMIN`, `DC` (own district). Query: `status`, `reason_co
       "status": "OPEN",
       "reason_code": "NO_REPLY_12H",
       "reason": "no reply after 12h",
-      "brief": "فیلڈ کام: حوالہ 9E2B4C11، تحصیل Johi۔ …\n\nField task: ref 9E2B4C11, tehsil Johi. …",
+      "brief": "[Urdu text]",
       "source_alert_id": "6a3c…",
       "created_at": "2026-11-10T12:00:03Z",
       "outcome": null,

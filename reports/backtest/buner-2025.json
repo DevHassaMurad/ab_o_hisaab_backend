@@ -1,0 +1,51 @@
+{
+ "key": "buner-2025",
+ "run_no": 1,
+ "complete": true,
+ "expected": "TRIGGER",
+ "passed": false,
+ "basis": "tier_crossing",
+ "hero_district": "Buner",
+ "min_lead_days": 1,
+ "reference_onset": "2025-08-15",
+ "first_release": null,
+ "tier_first_dates": {
+  "WATCH": null,
+  "WARNING": null,
+  "ACTION": null
+ },
+ "max_score": {
+  "district": "Buner",
+  "value": 24,
+  "run_date": "2025-08-13"
+ },
+ "districts": [
+  {
+   "name": "Buner",
+   "max_score": 24,
+   "days_at_or_above_watch": 0
+  },
+  {
+   "name": "Shangla",
+   "max_score": 18,
+   "days_at_or_above_watch": 0
+  },
+  {
+   "name": "Swat",
+   "max_score": 18,
+   "days_at_or_above_watch": 0
+  }
+ ],
+ "watch_margin": null,
+ "forecast_provenance": {
+  "PERFECT_FORECAST_PROXY": 1.0
+ },
+ "forecast_is_proxy": true,
+ "model_versions": [
+  "rules-fallback-1"
+ ],
+ "failures": [
+  "Buner never triggered"
+ ],
+ "simulated": true
+}

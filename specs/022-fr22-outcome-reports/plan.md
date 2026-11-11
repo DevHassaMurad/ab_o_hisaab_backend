@@ -88,7 +88,7 @@ For `OutcomeReport` (data-model.md §5), merged by the foundation owner before t
 ```json
 {
   "version": "outcome-v1",
-  "q1": {"key": "evacuated", "value": 1, "code": "YES", "raw": "۱", "at": "2022-09-02T08:14:03Z"},
+  "q1": {"key": "evacuated", "value": 1, "code": "YES", "raw": "\u06f1", "at": "2022-09-02T08:14:03Z"},
   "q2": {"key": "spent_on", "value": 1, "code": "FOOD", "raw": "1 khana", "at": "2022-09-02T08:16:40Z"},
   "q3": {"key": "helped", "value": null, "code": null, "raw": "ok", "at": "2022-09-02T08:20:11Z", "invalid": true}
 }
@@ -100,24 +100,24 @@ Template keys for FR14 (Urdu first, then English, one message each):
 
 | key | Text |
 |---|---|
-| `outcome_intro` | السلام علیکم۔ آب و حساب: سیلاب سے پہلے ملنے والی رقم کے بارے میں 3 مختصر سوال۔ ہر سوال کا جواب صرف ایک نمبر سے دیں۔ / Aab o Hisaab: 3 short questions about the money you received before the flood. Reply with one number. |
-| `outcome_q1_household` | کیا آپ پانی آنے سے پہلے اپنے گھر والوں کو محفوظ جگہ لے گئے؟ 1 ہاں 2 نہیں / Did you move your family to a safe place before the water came? 1 Yes 2 No |
-| `outcome_q1_shopkeeper` | کیا آپ نے پانی آنے سے پہلے دکان کا مال بچا لیا؟ 1 سارا 2 کچھ 3 نہیں / Did you protect your shop's goods before the water came? 1 All 2 Some 3 None |
-| `outcome_q2` | آپ نے رقم زیادہ تر کس چیز پر خرچ کی؟ 1 کھانا 2 سفر یا نقل مکانی 3 رہائش 4 دوا 5 دکان یا مال 6 کچھ اور / What did you spend most of the money on? 1 Food 2 Transport or moving 3 Shelter 4 Medicine 5 Shop or goods 6 Something else |
-| `outcome_q3` | اس رقم سے آپ کو کتنی مدد ملی؟ 1 بہت 2 تھوڑی 3 بالکل نہیں / How much did this money help? 1 A lot 2 A little 3 Not at all |
-| `outcome_reask` | براہ کرم فہرست میں سے صرف ایک نمبر بھیجیں۔ / Please reply with one number from the list. |
-| `outcome_thanks` | شکریہ! آپ کے جوابات سے امداد بہتر بنائی جائے گی۔ آپ کا نام کسی کو نہیں دکھایا جائے گا۔ / Thank you! Your answers help improve support. Your name will not be shown to anyone. |
+| `outcome_intro` | Aab o Hisaab: 3 short questions about the money you received before the flood. Reply with one number. |
+| `outcome_q1_household` | Did you move your family to a safe place before the water came? 1 Yes 2 No |
+| `outcome_q1_shopkeeper` | Did you protect your shop's goods before the water came? 1 All 2 Some 3 None |
+| `outcome_q2` | What did you spend most of the money on? 1 Food 2 Transport or moving 3 Shelter 4 Medicine 5 Shop or goods 6 Something else |
+| `outcome_q3` | How much did this money help? 1 A lot 2 A little 3 Not at all |
+| `outcome_reask` | Please reply with one number from the list. |
+| `outcome_thanks` | Thank you! Your answers help improve support. Your name will not be shown to anyone. |
 
 Codes: Q1 household `YES`/`NO`; Q1 shopkeeper `ALL`/`SOME`/`NONE`; Q2 `FOOD`/`TRANSPORT`/`SHELTER`/`MEDICINE`/`SHOP_GOODS`/`OTHER`; Q3 `A_LOT`/`A_LITTLE`/`NOT_AT_ALL`. In each message the Urdu block comes first, then a blank line, then English, with options on separate lines.
 
 ## Story templates
 
-| Type | Urdu | English |
-|---|---|---|
-| Household headline | {district}: {pct}% گھرانے بروقت محفوظ جگہ پہنچے | {pct}% of households moved to safety in {district} |
-| Household body | {district} میں جواب دینے والے {n} گھرانوں میں سے {k} ({pct}%) پانی آنے سے پہلے اپنے گھر والوں کو محفوظ جگہ لے گئے۔ زیادہ تر نے رقم {top_ur} پر خرچ کی۔ | In {district}, {k} of {n} households who answered ({pct}%) moved their families to safety before the water came. Most spent the money on {top_en}. |
-| Shopkeeper headline | {district}: {pct}% دکانداروں نے مال بچایا | {pct}% of shopkeepers protected their goods in {district} |
-| Shopkeeper body | {district} میں جواب دینے والے {n} دکانداروں میں سے {k} ({pct}%) نے پانی آنے سے پہلے اپنا سارا یا کچھ مال بچا لیا۔ {helped_pct}% نے کہا کہ رقم سے بہت مدد ملی۔ | In {district}, {k} of {n} shopkeepers who answered ({pct}%) protected all or some of their goods before the water came. {helped_pct}% said the money helped a lot. |
+| Type | English |
+|---|---|
+| Household headline | {pct}% of households moved to safety in {district} |
+| Household body | In {district}, {k} of {n} households who answered ({pct}%) moved their families to safety before the water came. Most spent the money on {top_en}. |
+| Shopkeeper headline | {pct}% of shopkeepers protected their goods in {district} |
+| Shopkeeper body | In {district}, {k} of {n} shopkeepers who answered ({pct}%) protected all or some of their goods before the water came. {helped_pct}% said the money helped a lot. |
 
 A story is produced only for a cell that is not suppressed for the question it cites.
 
@@ -175,9 +175,9 @@ DONOR on `/reports` or `/progress` → `403 INDIVIDUAL_DATA_DENIED` (mirrors UC1
 {
   "items": [
     {"district": "Dadu", "beneficiary_type": "HOUSEHOLD", "event_period": "2022-08",
-     "headline_ur": "دادو: 83% گھرانے بروقت محفوظ جگہ پہنچے",
+     "headline_ur": "[Urdu text]",
      "headline_en": "83% of households moved to safety in Dadu",
-     "body_ur": "دادو میں جواب دینے والے 40 گھرانوں میں سے 33 (83%) …",
+     "body_ur": "[Urdu text]",
      "body_en": "In Dadu, 33 of 40 households who answered (83%) moved their families to safety before the water came. Most spent the money on food.",
      "n_respondents": 40, "simulated": true}
   ]

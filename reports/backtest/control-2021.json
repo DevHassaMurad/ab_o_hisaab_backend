@@ -1,0 +1,55 @@
+{
+ "key": "control-2021",
+ "run_no": 1,
+ "complete": true,
+ "expected": "NO_TRIGGER",
+ "passed": true,
+ "basis": "tier_crossing",
+ "hero_district": null,
+ "min_lead_days": null,
+ "reference_onset": null,
+ "first_release": null,
+ "tier_first_dates": {},
+ "max_score": {
+  "district": "Jamshoro",
+  "value": 23,
+  "run_date": "2021-09-05"
+ },
+ "districts": [
+  {
+   "name": "Dadu",
+   "max_score": 16,
+   "days_at_or_above_watch": 0
+  },
+  {
+   "name": "Jamshoro",
+   "max_score": 23,
+   "days_at_or_above_watch": 0
+  },
+  {
+   "name": "Khairpur",
+   "max_score": 13,
+   "days_at_or_above_watch": 0
+  },
+  {
+   "name": "Larkana",
+   "max_score": 15,
+   "days_at_or_above_watch": 0
+  },
+  {
+   "name": "Qambar Shahdadkot",
+   "max_score": 18,
+   "days_at_or_above_watch": 0
+  }
+ ],
+ "watch_margin": 17,
+ "forecast_provenance": {
+  "PERFECT_FORECAST_PROXY": 1.0
+ },
+ "forecast_is_proxy": true,
+ "model_versions": [
+  "rules-fallback-1"
+ ],
+ "failures": [],
+ "simulated": true
+}

@@ -165,6 +165,8 @@ These resolve contradictions in the project document. Specs must follow them.
 
 - **D7 Shared helper names**: all specs use the foundation names. These are `current_scenario()` / `use_scenario()` (not `ScenarioContext.get()`), `flags.is_enabled(...)` (not `is_on`), and the flags `FR13_LLM`, `FR16_FALLBACK`, `FR21_LIVE_VERIFY`, `FR22_OUTCOME`.
 
+- **D8 English-only specs**: All specs are written in English only. Beneficiary-facing messages are specified in English; the Urdu translation is produced later by a native speaker into one translation file (`app/services/messaging/templates/ur.yaml`). Code sketches mark translation slots as `"[Urdu text]"`. Urdu and Arabic-Indic digits in replies are still accepted; specs refer to them by name or code point (for example U+06F1).
+
 ---
 
 ## Quality Standards

@@ -1,0 +1,35 @@
+{
+ "builders": {
+  "fr1": "nasa_power_raw_json"
+ },
+ "built_at": "2026-11-11T03:47:16+00:00",
+ "files": {
+  "nasa_power/PK-SD-DAD.json": {
+   "rows": 71,
+   "sha256": "1fcd9224f5db32576f49fff800cd0bdd3cc27c6b5e9ee05a8aefc5933320de95"
+  },
+  "nasa_power/PK-SD-JMS.json": {
+   "rows": 71,
+   "sha256": "1a36429088cb21a413f812e380db804162b7a4ef4b3408bc03dcabbd05dccbb8"
+  },
+  "nasa_power/PK-SD-KHP.json": {
+   "rows": 71,
+   "sha256": "86b8adc3a95aec9aaf458374b42604980b6c4f4241ed0da59572898fd2398f1a"
+  },
+  "nasa_power/PK-SD-LRK.json": {
+   "rows": 71,
+   "sha256": "7797149a192a79d8a01794f7ef3195fd3bfa91ea0c567b35ceb0cf8fee48714d"
+  },
+  "nasa_power/PK-SD-QSK.json": {
+   "rows": 71,
+   "sha256": "5f48a7861da4f5809276ecd194dc5eefc10ea46a46111189ae94fc94dc0195d4"
+  }
+ },
+ "key": "sindh-2022",
+ "notes": "IMERG and archived forecast caches not built yet; forecast rain in replay is a PERFECT_FORECAST_PROXY from observed NASA POWER rain.",
+ "window": {
+  "end": "2022-09-10",
+  "spinup_days": 30,
+  "start": "2022-08-01"
+ }
+}

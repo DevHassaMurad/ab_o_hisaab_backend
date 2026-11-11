@@ -1,0 +1,37 @@
+# Replay scenarios (owned by FR5; FR1/FR2 read the windows and districts to build their caches).
+# Districts are resolved by name + province. Dates marked "verify" come from FR5 clarify.md.
+defaults:
+  spinup_days: 30
+  funds: {allocated_pkr: "50000000.00"}          # per district; tiers, split and cap use FR6 defaults
+  approval_mode: AUTO_SIM
+scenarios:
+  - key: sindh-2022
+    name: "Sindh monsoon floods 2022"
+    start_date: 2022-08-01
+    end_date: 2022-09-10
+    expected_outcome: TRIGGER
+    districts: [{name: Dadu, province: SINDH}, {name: Qambar Shahdadkot, province: SINDH},
+                {name: Larkana, province: SINDH}, {name: Jamshoro, province: SINDH},
+                {name: Khairpur, province: SINDH}]
+    hero_district: Dadu
+    reference_onset: {Dadu: 2022-08-22}          # verify (NDMA sitreps)
+    min_lead_days: 3
+    stretch_lead_days: 7
+  - key: buner-2025
+    name: "Buner flash flood 2025"
+    start_date: 2025-08-01
+    end_date: 2025-08-25
+    expected_outcome: TRIGGER
+    districts: [{name: Buner, province: KP}, {name: Swat, province: KP}, {name: Shangla, province: KP}]
+    hero_district: Buner
+    reference_onset: {Buner: 2025-08-15}         # verify
+    min_lead_days: 1
+    stretch_lead_days: 2
+  - key: control-2021
+    name: "Normal Sindh monsoon 2021 (control)"
+    start_date: 2021-08-01
+    end_date: 2021-09-10
+    expected_outcome: NO_TRIGGER
+    districts: [{name: Dadu, province: SINDH}, {name: Qambar Shahdadkot, province: SINDH},
+                {name: Larkana, province: SINDH}, {name: Jamshoro, province: SINDH},
+                {name: Khairpur, province: SINDH}]

@@ -306,7 +306,7 @@ class TemplateExplainService:
         f = i.top_factors[:3]
         if f:
             en.append(T.EN_REASONS.format(", ".join(T.FACTOR_EN[x["factor"]].format(v=fmt(x)) for x in f)))
-            ur.append(T.UR_REASONS.format("، ".join(T.FACTOR_UR[x["factor"]].format(v=fmt(x)) for x in f)))
+            ur.append(T.UR_REASONS.format("\u060c ".join(T.FACTOR_UR[x["factor"]].format(v=fmt(x)) for x in f)))
         for flag, key in ((i.is_fallback, "fallback"), (i.is_stale_input, "stale"), (i.forecast_is_proxy, "proxy")):
             if flag:
                 en.append(T.NOTICE_EN[key].format(date=i.stale_since and i.stale_since.strftime("%d %b")))

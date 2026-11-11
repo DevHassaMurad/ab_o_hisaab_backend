@@ -18,7 +18,7 @@
 ### Codes (`app/services/triggers/approval_codes.py`)
 
 ```python
-_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789")
+_DIGITS = str.maketrans("\u06f0\u06f1\u06f2\u06f3\u06f4\u06f5\u06f6\u06f7\u06f8\u06f9\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669", "01234567890123456789")
 
 def generate_code() -> str:
     return f"{secrets.randbelow(1_000_000):06d}"
@@ -69,8 +69,6 @@ def request_approval(db: Session, release: FundRelease) -> Approval:
 
 Example request message (FR14 renders; Urdu first):
 ```
-ایکشن الرٹ: دادو، خطرہ 86/100۔ PKR 30,000,000 (نقد امداد) کی منظوری درکار ہے۔
-منظوری: APPROVE 482913   مسترد: REJECT <وجہ>
 ACTION tier: Dadu, risk 86/100. Approve PKR 30,000,000 (Cash support)?
 Reply APPROVE 482913 or REJECT <reason>. Escalates to PDMA at 05:00 PKT if unanswered.
 ```
@@ -162,8 +160,8 @@ def approve_with_otp(db, approval_id, user, otp) -> DecisionResult:
 ### WhatsApp handler (`app/services/triggers/dc_commands.py`)
 
 ```python
-_APPROVE = {"approve", "منظور"}
-_REJECT = {"reject", "مسترد"}
+_APPROVE = {"approve", "[Urdu text]"}
+_REJECT = {"reject", "[Urdu text]"}
 
 def parse_dc_command(body: str) -> DcCommand | None:
     text = " ".join(normalise_digits(body).split())

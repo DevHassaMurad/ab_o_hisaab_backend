@@ -122,7 +122,7 @@ Response `200`:
       "precomputed": true,
       "simulated": false,
       "label_en": "Precomputed from real Sentinel-1 radar images captured on 22 Aug 2022. Permanent water removed.",
-      "label_ur": "یہ نقشہ 22 اگست 2022 کی اصل سینٹینل-1 ریڈار تصاویر سے پہلے سے تیار کیا گیا ہے۔ مستقل پانی شامل نہیں۔"
+      "label_ur": "[Urdu text]"
     }
   ],
   "total": 1, "page": 1, "page_size": 50

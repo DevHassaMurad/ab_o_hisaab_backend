@@ -1,0 +1,63 @@
+{
+ "key": "sindh-2022",
+ "run_no": 1,
+ "complete": true,
+ "expected": "TRIGGER",
+ "passed": true,
+ "basis": "tier_crossing",
+ "hero_district": "Dadu",
+ "min_lead_days": 3,
+ "reference_onset": "2022-08-22",
+ "first_release": {
+  "tier": "WATCH",
+  "run_date": "2022-08-01",
+  "lead_days": 21
+ },
+ "tier_first_dates": {
+  "WATCH": "2022-08-01",
+  "WARNING": "2022-08-01",
+  "ACTION": "2022-08-03"
+ },
+ "max_score": {
+  "district": "Jamshoro",
+  "value": 95,
+  "run_date": "2022-08-21"
+ },
+ "districts": [
+  {
+   "name": "Dadu",
+   "max_score": 95,
+   "days_at_or_above_watch": 41
+  },
+  {
+   "name": "Jamshoro",
+   "max_score": 95,
+   "days_at_or_above_watch": 41
+  },
+  {
+   "name": "Khairpur",
+   "max_score": 90,
+   "days_at_or_above_watch": 41
+  },
+  {
+   "name": "Larkana",
+   "max_score": 95,
+   "days_at_or_above_watch": 41
+  },
+  {
+   "name": "Qambar Shahdadkot",
+   "max_score": 95,
+   "days_at_or_above_watch": 41
+  }
+ ],
+ "watch_margin": null,
+ "forecast_provenance": {
+  "PERFECT_FORECAST_PROXY": 1.0
+ },
+ "forecast_is_proxy": true,
+ "model_versions": [
+  "rules-fallback-1"
+ ],
+ "failures": [],
+ "simulated": true
+}

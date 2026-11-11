@@ -20,7 +20,7 @@
 - Q: What if the district has no active DC? → A: The request is created and escalated immediately (`escalation_reason=NO_DC_ASSIGNED`) so officers know. It can only be decided once a DC is assigned.
 - Q: How are concurrent decisions handled? → A: The approval row is locked `FOR UPDATE`; the second decision gets 409 `APPROVAL_ALREADY_DECIDED` (dashboard) or an "already decided" reply (WhatsApp).
 - Q: Are failed OTP attempts persisted when the request fails? → A: Yes. The attempt counter and the `APPROVAL_CODE_FAILED` audit entry are committed before the error response, otherwise attempts could be retried without limit.
-- Q: Which keywords are accepted? → A: `APPROVE` / `منظور` and `REJECT` / `مسترد`, case-insensitive, with Urdu (۰–۹) and Arabic-Indic (٠–٩) digits normalised, and spaces inside the code ignored.
+- Q: Which keywords are accepted? → A: `APPROVE` and `REJECT`, case-insensitive, with Urdu (0 (Urdu digits)–9 (Urdu digits)) and Arabic-Indic (0 (Arabic-Indic digits)–9 (Arabic-Indic digits)) digits normalised, and spaces inside the code ignored.
 - Q: Who gets notified on decisions? → A: Reject: all active PDMA officers (`approval_rejected_officer`). Approve: officers only if the request had escalated (`approval_decided_officer`). The DC gets the WhatsApp reply (WhatsApp channel) or the API response (dashboard).
 
 ## Resolved by constitution decisions

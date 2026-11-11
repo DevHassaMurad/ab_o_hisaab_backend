@@ -111,41 +111,39 @@ Sanity check (slow): a normal week (7 d 20 mm, 30 d 60 mm, soil 0.35, vuln 0.6) 
 
 Rendered by `TemplateExplainService.explain_risk(RiskExplainInputs)`. Numbers formatted: integers as-is, mm rounded to whole mm, wetness as whole %. Western digits in both languages. Tier labels:
 
-| Tier | EN | UR |
-|---|---|---|
-| NONE | Normal | معمول |
-| WATCH | Watch | نگرانی |
-| WARNING | Warning | انتباہ |
-| ACTION | Action | کارروائی |
+| Tier | EN |
+|---|---|
+| NONE | Normal |
+| WATCH | Watch |
+| WARNING | Warning |
+| ACTION | Action |
 
 **Main sentence**
 - EN: `{district}: flood risk {score}/100 ({tier_en}). Highest in {peak_lead_day} day(s), on {target_date:%d %b}.`
-- UR: `{district_ur}: سیلاب کا خطرہ {score}/100 ({tier_ur})۔ سب سے زیادہ خطرہ {peak_lead_day} دن بعد، {target_date:%d-%m} کو۔`
 
-**Reasons sentence** — top 2–3 factors with positive contribution, joined by ", " / "، ":
-- EN: `Main reasons: {f1}, {f2}{, f3}.` UR: `بڑی وجوہات: {f1}، {f2}{، f3}۔`
+**Reasons sentence** — top 2–3 factors with positive contribution, joined by ", ":
+- EN: `Main reasons: {f1}, {f2}{, f3}.`
 
-| Factor | EN phrase | UR phrase |
-|---|---|---|
-| `rain_3d_mm` | `{v} mm of rain over 3 days` | `3 دن میں {v} ملی میٹر بارش` |
-| `rain_7d_mm` | `{v} mm of rain over 7 days` | `7 دن میں {v} ملی میٹر بارش` |
-| `rain_14d_mm` | `{v} mm of rain over 14 days` | `14 دن میں {v} ملی میٹر بارش` |
-| `rain_30d_mm` | `{v} mm of rain over 30 days` | `30 دن میں {v} ملی میٹر بارش` |
-| `rain_fcst_target_mm` | `{v} mm of rain forecast that day` | `اس دن {v} ملی میٹر بارش کی پیشگوئی` |
-| `rain_24h_fcst_mm` / `rain_48h_fcst_mm` | `{v} mm of rain forecast in the next 24 h` / `48 h` | `اگلے 24 / 48 گھنٹوں میں {v} ملی میٹر بارش متوقع` |
-| `max_3h_fcst_mm`, `max_3h_obs_mm` | `bursts of up to {v} mm in 3 hours` | `3 گھنٹوں میں {v} ملی میٹر تک تیز بارش` |
-| `soil_wetness_root`, `soil_wetness_top` | `soil already {v}% wet` | `زمین پہلے ہی {v} فیصد گیلی ہے` |
-| `slope_mean_deg` | `steep slopes ({v}°) make water run fast` | `ڈھلوان ({v} ڈگری) کی وجہ سے پانی تیزی سے بہتا ہے` |
-| `elevation_mean_m` | `low-lying land ({v} m)` | `نشیبی علاقہ ({v} میٹر)` |
-| `vulnerability_weight` | `many vulnerable households (index {v}%)` | `کمزور گھرانے زیادہ ہیں (اشاریہ {v} فیصد)` |
+| Factor | EN phrase |
+|---|---|
+| `rain_3d_mm` | `{v} mm of rain over 3 days` |
+| `rain_7d_mm` | `{v} mm of rain over 7 days` |
+| `rain_14d_mm` | `{v} mm of rain over 14 days` |
+| `rain_30d_mm` | `{v} mm of rain over 30 days` |
+| `rain_fcst_target_mm` | `{v} mm of rain forecast that day` |
+| `rain_24h_fcst_mm` / `rain_48h_fcst_mm` | `{v} mm of rain forecast in the next 24 h` / `48 h` |
+| `max_3h_fcst_mm`, `max_3h_obs_mm` | `bursts of up to {v} mm in 3 hours` |
+| `soil_wetness_root`, `soil_wetness_top` | `soil already {v}% wet` |
+| `slope_mean_deg` | `steep slopes ({v}°) make water run fast` |
+| `elevation_mean_m` | `low-lying land ({v} m)` |
+| `vulnerability_weight` | `many vulnerable households (index {v}%)` |
 
 **Notices** (appended in this order, each only when true):
-- fallback — EN `Model unavailable: score from the rainfall rule.` UR `ماڈل دستیاب نہیں: یہ اسکور بارش کے اصول سے بنا ہے۔`
-- stale — EN `Some data is old (last valid {stale_since:%d %b}).` UR `کچھ معلومات پرانی ہیں (آخری درست تاریخ {stale_since:%d-%m})۔`
-- proxy — EN `Replay: forecast rain is a proxy built from observed data.` UR `ری پلے: بارش کی پیشگوئی اصل مشاہدے سے بنائی گئی ہے۔`
+- fallback — EN `Model unavailable: score from the rainfall rule.`
+- stale — EN `Some data is old (last valid {stale_since:%d %b}).`
+- proxy — EN `Replay: forecast rain is a proxy built from observed data.`
 
 Example (EN): `Dadu: flood risk 82/100 (Action). Highest in 2 day(s), on 24 Aug. Main reasons: 184 mm of rain over 7 days, soil already 91% wet.`
-Example (UR): `Dadu: سیلاب کا خطرہ 82/100 (کارروائی)۔ سب سے زیادہ خطرہ 2 دن بعد، 24-08 کو۔ بڑی وجوہات: 7 دن میں 184 ملی میٹر بارش، زمین پہلے ہی 91 فیصد گیلی ہے۔`
 
 Urdu strings need a native-speaker review before the demo (tasks.md T046).
 
@@ -199,7 +197,7 @@ Default `run_date` = latest run for the scenario. Response (GeoJSON, geometry si
  "score":82,"tier":"ACTION","peak_lead_day":2,
  "series":[{"lead_day":1,"target_date":"2022-08-23","probability":0.71,"score":71},
            {"lead_day":2,"target_date":"2022-08-24","probability":0.82,"score":82}],
- "explanation_en":"Dadu: flood risk 82/100 (Action). …","explanation_ur":"Dadu: سیلاب کا خطرہ 82/100 …",
+ "explanation_en":"Dadu: flood risk 82/100 (Action). …","explanation_ur":"[Urdu text]",
  "top_factors":[{"factor":"rain_7d_mm","value":184,"contribution":0.41},{"factor":"soil_wetness_root","value":0.91,"contribution":0.22}],
  "thresholds":{"WATCH":40,"WARNING":60,"ACTION":80},"fund_remaining_pkr":"42000000.00",
  "is_fallback":false,"is_stale_input":false,"stale_since":null,"forecast_provenance":"ARCHIVED_SHORT_LEAD_PROXY",

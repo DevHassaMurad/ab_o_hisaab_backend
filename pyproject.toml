@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aab-o-hisaab-backend"
+version = "0.1.0"
+description = "Aab o Hisaab AI backend: flood forecasts to tiered anticipatory disaster finance"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.8",
+  "pydantic-settings>=2.4",
+  "sqlalchemy>=2.0.36",
+  "alembic>=1.13",
+  "psycopg[binary]>=3.2",
+  "geoalchemy2>=0.15",
+  "httpx>=0.27",
+  "apscheduler>=3.10,<4",
+  "pyjwt>=2.9",
+  "bcrypt>=4.2",
+  "pyyaml>=6.0",
+  "python-multipart>=0.0.9",
+  "numpy>=2.1",
+]
+
+[project.optional-dependencies]
+ee = ["earthengine-api>=1.4"]
+ml = ["scikit-learn>=1.5", "joblib>=1.4"]
+dev = ["pytest>=8.3", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "db: needs the Postgres test database (TEST_DATABASE_URL)",
+  "ee: needs Earth Engine credentials",
+  "live: calls a live external API",
+  "backtest: full NFR3 replay runs of the three scenarios (slow)",
+]
+addopts = "-m 'not ee and not live and not backtest'"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+ignore = ["RUF012"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Query", "app.core.security.require_role"]

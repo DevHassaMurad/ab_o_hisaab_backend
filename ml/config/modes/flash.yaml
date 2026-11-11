@@ -1,0 +1,23 @@
+mode: FLASH
+spec_version: 1
+mode_dir: flash
+description: "Short, intense bursts on steep slopes (KP)."
+artifact_version: current
+features: [rain_3d_mm, rain_7d_mm, rain_24h_fcst_mm, rain_48h_fcst_mm, rain_fcst_target_mm,
+           max_3h_fcst_mm, max_3h_obs_mm, soil_wetness_root, soil_wetness_top,
+           elevation_mean_m, slope_mean_deg, vulnerability_weight, lead_day]
+monotone: {rain_3d_mm: 1, rain_7d_mm: 1, rain_24h_fcst_mm: 1, rain_48h_fcst_mm: 1, rain_fcst_target_mm: 1,
+           max_3h_fcst_mm: 1, max_3h_obs_mm: 1, soil_wetness_root: 1, soil_wetness_top: 1,
+           slope_mean_deg: 1, vulnerability_weight: 1}
+lead_weights: {1: 1.0, 2: 1.0, 3: 0.85, 4: 0.7, 5: 0.6, 6: 0.6, 7: 0.6}
+lead_focus: {WATCH: 3, WARNING: 2, ACTION: 1}
+label: {min_flooded_pct: 1.0}                     # flash floods cover less area
+calibration: {method: isotonic, min_positives: 50, false_alarm_budget: {WATCH: 3.0, WARNING: 1.5, ACTION: 0.5}}
+fallback:
+  version: rules-fallback-1
+  terms:
+    - {feature: max_3h_fcst_mm, alt_feature: max_3h_obs_mm, weight: 0.40, ref: 40}
+    - {feature: rain_48h_fcst_mm,     weight: 0.25, ref: 120}
+    - {feature: slope_mean_deg,       weight: 0.15, ref: 30}
+    - {feature: soil_wetness_top,     weight: 0.10, ref: 1.0}
+    - {feature: vulnerability_weight, weight: 0.10, ref: 1.0}

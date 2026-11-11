@@ -84,7 +84,7 @@ Turn every system event that a person must know about (a tier change, an approva
 | III Traceability | `enqueue`, send, status change and phone flag each call `AuditService.record` in the same transaction. Payloads hold ids, enums, template keys and SHA-256 of the message text, never phone numbers or text. |
 | VI Privacy | Templates never contain name, CNIC, wallet id or phone. The alerts API returns a masked phone (`+92300****567`) to officers and DCs only; DCs see only their district. No donor access. |
 | VII Degrade gracefully | Twilio down → retries, then `FAILED` with an error code, visible in stats. A failed DC message never blocks the approval: the dashboard path (FR8) still works. |
-| VIII Honest prototype | Every message about simulated money carries the "آزمائشی / DEMO: not real money" line. Dry-run sends set `Alert.simulated=true`. Synthetic numbers never get a real send. |
+| VIII Honest prototype | Every message about simulated money carries the "DEMO: not real money" line. Dry-run sends set `Alert.simulated=true`. Synthetic numbers never get a real send. |
 | IX Config over code | Template text lives in `catalogue.yaml`. Timings, batch sizes, allowlist and Twilio numbers live in settings. No district names in code. |
 | X Simplicity | The `alert` table is the queue. No broker. One in-process worker with a small thread pool. |
 | XI Tests | Tests first for idempotent enqueue, the worker state transitions, the NFR2 latency budget and the signature check. |

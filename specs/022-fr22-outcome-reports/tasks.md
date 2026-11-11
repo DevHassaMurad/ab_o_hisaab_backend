@@ -53,7 +53,7 @@ description: "Task list for FR22 Outcome Reports (roadmap, behind FR22_OUTCOME)"
 
 ### Tests (write first) ⚠️
 
-- [ ] T012 [P] [US2] Unit tests `parse_answer`: `1`, `۱`, `١`, `1 haan`, `  2`, `7` (invalid for 3-option question), `abc`, empty; option ranges per question and type in `tests/unit/outcomes/test_questions_parse.py`
+- [ ] T012 [P] [US2] Unit tests `parse_answer`: `1`, `1` (Urdu digits), `1` (Arabic-Indic digits), `1 haan`, `  2`, `7` (invalid for 3-option question), `abc`, empty; option ranges per question and type in `tests/unit/outcomes/test_questions_parse.py`
 - [ ] T013 [P] [US2] Integration tests with `ReplayClock`: due after 7 days from last PAID; not due if a later payment exists; skipped while a payment notice awaits reply (<48 h); outside send window skipped; one survey per event (job twice); shopkeeper gets `outcome_q1_shopkeeper`; replies advance questions; re-ask once then null; completion queues thanks; duplicate `provider_message_id` ignored; three audit event types written in `tests/integration/outcomes/test_survey_flow.py`
 
 ### Implementation

@@ -26,7 +26,7 @@ description: "Task list for FR8 DC Approval of Action-Tier Releases"
 
 **⚠️ Blocks every story.**
 
-- [ ] T004 [P] Failing unit tests: `generate_code` always returns 6 ASCII digits (leading zeros kept) and uses `secrets`; `hash_code`/`verify_code` round-trip and reject a different code; `normalise_digits` maps `۰-۹` and `٠-٩`, in `tests/unit/triggers/test_approval_codes.py`
+- [ ] T004 [P] Failing unit tests: `generate_code` always returns 6 ASCII digits (leading zeros kept) and uses `secrets`; `hash_code`/`verify_code` round-trip and reject a different code; `normalise_digits` maps `0-9` (Urdu digits) and `0-9` (Arabic-Indic digits), in `tests/unit/triggers/test_approval_codes.py`
 - [ ] T005 [P] Failing gate tests: PDMA officer, admin, donor and other-district DC get 403 on approve/reject; no `Allocation` rows exist for a PENDING or ESCALATED approval; `decide()` on a decided approval raises 409, in `tests/integration/triggers/test_approval_gate.py`
 - [ ] T006 Implement `generate_code`, `hash_code`, `verify_code`, `normalise_digits` in `app/services/triggers/approval_codes.py`
 - [ ] T007 Implement `APPROVAL_TRANSITIONS`, `request_approval` (code, alert, audit, no-DC escalation) and `decide` (lock, approver check, burn codes, audit, FR7 transition + pipeline or reject + officer notice) in `app/services/triggers/approvals.py`

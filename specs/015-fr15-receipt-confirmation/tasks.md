@@ -33,7 +33,7 @@ description: "Task list for FR15 receipt confirmation"
 ### Tests first
 
 - [ ] T005 [P] Unit test `normalise` and `parse_reply` against every corpus case in `tests/unit/messaging/test_reply_parser.py`
-- [ ] T006 [P] Unit test `is_command` (`APPROVE 1`, `approve`, `  REJECT reason`, `APPROVED`, `REJECTION`, `۱ APPROVE`) in `tests/unit/messaging/test_command_detection.py`
+- [ ] T006 [P] Unit test `is_command` (`APPROVE 1`, `approve`, `  REJECT reason`, `APPROVED`, `REJECTION`, `1 APPROVE` (Urdu digits)) in `tests/unit/messaging/test_command_detection.py`
 - [ ] T007 Integration test `record_confirmation`: inserts row with alert, beneficiary, payment, channel, status, encrypted raw reply, message id, scenario of the alert, `simulated` rule; writes one `RECEIPT_*` audit entry with `reply_sha256` and no raw text; duplicate message id raises `DuplicateInbound`, in `tests/integration/messaging/test_inbound_receipt.py`
 
 ### Implementation
@@ -50,13 +50,13 @@ description: "Task list for FR15 receipt confirmation"
 
 ## Phase 3: User Story 1 - Beneficiary confirms with one digit (Priority: P1) 🎯 MVP
 
-**Goal**: `1`/`۱`/`١` from the beneficiary's phone marks the latest notice Confirmed.
+**Goal**: `1`/`1` (Urdu digits)/`1` (Arabic-Indic digits) from the beneficiary's phone marks the latest notice Confirmed.
 
 **Independent Test**: `pytest tests/integration/messaging/test_inbound_receipt.py tests/contract/test_inbound_webhook.py -k receipt`
 
 ### Tests for User Story 1
 
-- [ ] T013 [P] [US1] Contract test: signed form `Body=۱` → 200 `text/xml` `<Response/>`; `CONFIRMED` row; `receipt.ack.confirmed` alert queued with dedupe `ACK:{sid}`, in `tests/contract/test_inbound_webhook.py`
+- [ ] T013 [P] [US1] Contract test: signed form `Body=1` (Urdu digits) → 200 `text/xml` `<Response/>`; `CONFIRMED` row; `receipt.ack.confirmed` alert queued with dedupe `ACK:{sid}`, in `tests/contract/test_inbound_webhook.py`
 - [ ] T014 [P] [US1] Integration tests: `2` → `NOT_RECEIVED` + `receipt.ack.not_received` with `{ref}`; `2` then `1` → two rows, effective `CONFIRMED`; two notices → latest wins; shared phone across two beneficiaries → latest across both; SMS fallback notice answerable; reply's scenario equals alert's scenario and audit lands in that chain, in `tests/integration/messaging/test_inbound_receipt.py`
 
 ### Implementation for User Story 1
@@ -76,7 +76,7 @@ description: "Task list for FR15 receipt confirmation"
 
 ### Tests for User Story 2
 
-- [ ] T017 [P] [US2] Integration tests with the FR8 stub: `approve ۴۸۲۹۱۳` from the DC phone → handler called once with `approve 482913`, the DC user, the sid; each outcome renders `dc.approval_result.<outcome>`; command from a beneficiary phone → not called, `UNPARSEABLE`; from an officer → `official.not_authorised`; DC "hello" → `dc.help`; inactive DC → treated as unknown; handler raises → no confirmation/approval writes, `dc.approval_result.ERROR` queued, response 200; phone that is both DC and beneficiary: `1` → receipt, `APPROVE …` → FR8, in `tests/integration/messaging/test_inbound_dc_routing.py`
+- [ ] T017 [P] [US2] Integration tests with the FR8 stub: `approve 482913` (Urdu digits) from the DC phone → handler called once with `approve 482913`, the DC user, the sid; each outcome renders `dc.approval_result.<outcome>`; command from a beneficiary phone → not called, `UNPARSEABLE`; from an officer → `official.not_authorised`; DC "hello" → `dc.help`; inactive DC → treated as unknown; handler raises → no confirmation/approval writes, `dc.approval_result.ERROR` queued, response 200; phone that is both DC and beneficiary: `1` → receipt, `APPROVE …` → FR8, in `tests/integration/messaging/test_inbound_dc_routing.py`
 
 ### Implementation for User Story 2
 
@@ -156,7 +156,7 @@ description: "Task list for FR15 receipt confirmation"
 ## Phase 9: Polish & Cross-Cutting Concerns
 
 - [ ] T032 [P] Load test: 20 concurrent signed inbound requests, p95 < 2 s; note in PR
-- [ ] T033 Sandbox manual check: hero phone replies `1`, `۱`, `٢`, `ok`, and the DC phone sends `APPROVE <code>` against a real FR8 build; record results in the PR
+- [ ] T033 Sandbox manual check: hero phone replies `1`, `1` (Urdu digits), `2` (Arabic-Indic digits), `ok`, and the DC phone sends `APPROVE <code>` against a real FR8 build; record results in the PR
 - [ ] T034 [P] `ruff check app/services/messaging app/api/v1/confirmations.py` and `mypy --strict app/services/messaging`
 
 ---

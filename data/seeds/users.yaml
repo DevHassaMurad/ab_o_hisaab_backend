@@ -1,0 +1,7 @@
+# Demo accounts. Passwords come from SEED_USER_PASSWORD (default "demo" for local development only).
+users:
+  - {email: officer@pdma-sindh.demo, full_name: "Demo PDMA Officer", role: PDMA_OFFICER}
+  - {email: dc.dadu@sindh.demo, full_name: "Demo DC Dadu", role: DC, district: Dadu}
+  - {email: dc.buner@kp.demo, full_name: "Demo DC Buner", role: DC, district: Buner}
+  - {email: donor@fund.demo, full_name: "Demo Donor", role: DONOR}
+  - {email: admin@aab.demo, full_name: "Demo Admin", role: ADMIN}

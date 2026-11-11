@@ -277,9 +277,9 @@ The router wraps the call in one transaction; `OVERRIDE_EXCEEDS_POOL` from FR12 
 ### Reason templates (`app/services/explain/allocation_templates.py`)
 
 ```python
-TIER_UR = {"WATCH": "نگرانی", "WARNING": "انتباہ", "ACTION": "کارروائی"}
+TIER_UR = {"WATCH": "[Urdu text]", "WARNING": "[Urdu text]", "ACTION": "[Urdu text]"}
 TIER_EN = {"WATCH": "Watch", "WARNING": "Warning", "ACTION": "Action"}
-LEVEL_UR = {"high": "زیادہ", "medium": "درمیانہ", "low": "کم"}
+LEVEL_UR = {"high": "[Urdu text]", "medium": "[Urdu text]", "low": "[Urdu text]"}
 
 def level(x: float) -> str:
     return "high" if x >= 0.67 else "medium" if x >= 0.34 else "low"
@@ -291,30 +291,30 @@ HH_FUNDED_EN = ("Rank {rank} of {n} households in {tehsil}. Priority {score}/100
                 "{family} family members, flood exposure {exp} ({exp_lvl}), flood risk {risk}/100 in {lead} days, "
                 "earlier support PKR {support}. Amount PKR {amount}: {tier} tier household amount PKR {target} "
                 "minus PKR {prior} already paid in this flood event.")
-HH_FUNDED_UR = ("{tehsil} کے {n} گھرانوں میں آپ کا نمبر {rank} ہے۔ ترجیحی اسکور {score}/100۔ وجوہات: غربت {pov} ({pov_lvl_ur})، "
-                "گھر کے افراد {family}، سیلاب کا خطرہ {exp} ({exp_lvl_ur})، {lead} دن میں سیلاب کا امکان {risk}/100، "
-                "پہلے ملی امداد {support} روپے۔ رقم {amount} روپے: {tier_ur} درجے کی گھریلو رقم {target} روپے، "
-                "اس سیلاب میں پہلے ادا شدہ {prior} روپے منہا کر کے۔")
+HH_FUNDED_UR = ("[Urdu text]"
+                "[Urdu text]"
+                "[Urdu text]"
+                "[Urdu text]")
 SK_FUNDED_EN = ("Rank {rank} of {n} shopkeepers in {tehsil}. Priority {score}/100: stock at risk PKR {stock}, "
                 "flood exposure {exp} ({exp_lvl}), flood risk {risk}/100 in {lead} days, earlier support PKR {support}. "
                 "Amount PKR {amount}: {pct}% of stock, capped at PKR {cap}{prior_en}.")
-SK_FUNDED_UR = ("{tehsil} کے {n} دکانداروں میں آپ کا نمبر {rank} ہے۔ ترجیحی اسکور {score}/100۔ وجوہات: خطرے میں مال {stock} روپے، "
-                "سیلاب کا خطرہ {exp} ({exp_lvl_ur})، {lead} دن میں سیلاب کا امکان {risk}/100، پہلے ملی امداد {support} روپے۔ "
-                "رقم {amount} روپے: مال کا {pct} فیصد، زیادہ سے زیادہ حد {cap} روپے{prior_ur}۔")
+SK_FUNDED_UR = ("[Urdu text]"
+                "[Urdu text]"
+                "[Urdu text]")
 UNMET_EN = ("Rank {rank} of {n} {type_en}. Not funded this time: the {type_en} budget for this {tier} release ran out "
             "after rank {last_funded}. Recorded as unmet need of PKR {amount}.")
-UNMET_UR = ("{n} میں سے درجہ {rank}۔ اس بار رقم نہیں مل سکی کیونکہ اس {tier_ur} قسط کا بجٹ درجہ {last_funded} کے بعد ختم ہو گیا۔ "
-            "{amount} روپے کی ضرورت درج کر لی گئی ہے۔")
+UNMET_UR = ("[Urdu text]"
+            "[Urdu text]")
 EXCLUDED_EN = "Excluded from this release by the PDMA officer. Reason: {reason}."
-EXCLUDED_UR = "پی ڈی ایم اے افسر نے اس قسط سے خارج کیا۔ وجہ: {reason}۔"
+EXCLUDED_UR = "[Urdu text]"
 OVERRIDE_EN = " Amount changed by the PDMA officer from PKR {computed} to PKR {final}. Reason: {reason}."
-OVERRIDE_UR = " پی ڈی ایم اے افسر نے رقم {computed} روپے سے بدل کر {final} روپے کی۔ وجہ: {reason}۔"
+OVERRIDE_UR = "[Urdu text]"
 
 def render_allocation_reason(i: AllocationReasonInputs) -> tuple[str, str]:
     """Pure function: same inputs -> same text. Returns (en, ur)."""
 ```
 
-`prior_en`/`prior_ur` are empty unless the shopkeeper got an earlier partial payment in the event (`", minus PKR {prior} already paid"` / `"، پہلے ادا شدہ {prior} روپے منہا کر کے"`). Numbers use Western digits with thousands separators; the Urdu reviewer may switch to Urdu digits later (single helper).
+`prior_en`/`prior_ur` are empty unless the shopkeeper got an earlier partial payment in the event (`", minus PKR {prior} already paid"`). Numbers use Western digits with thousands separators; the Urdu reviewer may switch to Urdu digits later (single helper).
 
 ## Configuration
 

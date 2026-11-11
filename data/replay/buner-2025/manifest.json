@@ -1,0 +1,27 @@
+{
+ "builders": {
+  "fr1": "nasa_power_raw_json"
+ },
+ "built_at": "2026-11-11T03:47:16+00:00",
+ "files": {
+  "nasa_power/PK-KP-BNR.json": {
+   "rows": 55,
+   "sha256": "0827a204fdf3e6fb9b7c73fc425f2335b2d1a1ab0dc5a57f45b81c0c2c272b5f"
+  },
+  "nasa_power/PK-KP-SHG.json": {
+   "rows": 55,
+   "sha256": "3d15e1c0ee7eedf2e9649dae73504731dfa16957c204c0f44886a01e0bb223a2"
+  },
+  "nasa_power/PK-KP-SWT.json": {
+   "rows": 55,
+   "sha256": "7ca199dc11ecd8b49a39cf317063642620ebc2ab1211a1aa7be1f529b18e5f49"
+  }
+ },
+ "key": "buner-2025",
+ "notes": "IMERG and archived forecast caches not built yet; forecast rain in replay is a PERFECT_FORECAST_PROXY from observed NASA POWER rain.",
+ "window": {
+  "end": "2025-08-25",
+  "spinup_days": 30,
+  "start": "2025-08-01"
+ }
+}

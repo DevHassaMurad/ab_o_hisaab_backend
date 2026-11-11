@@ -9,7 +9,7 @@ Own the inbound WhatsApp webhook. Check that each message really comes from Twil
 ## Scope
 **In (MVP)**
 - `POST /api/v1/webhooks/whatsapp`: Twilio signature check (shared dependency from FR14), always-fast TwiML response
-- Reply parser: `1`/`2` in ASCII, Urdu (Extended Arabic-Indic `۱`/`۲`), Arabic-Indic (`١`/`٢`) and full-width digits; zero-width and bidi marks stripped; a short exact-match keyword list; media-only messages
+- Reply parser: `1`/`2` in ASCII, Urdu (Extended Arabic-Indic `1` (Urdu digits)/`2` (Urdu digits)), Arabic-Indic (`1` (Arabic-Indic digits)/`2` (Arabic-Indic digits)) and full-width digits; zero-width and bidi marks stripped; a short exact-match keyword list; media-only messages
 - Sender matching by `phone_hash`: DC/official users first for commands, then beneficiaries; the latest open reply-expecting alert (`PAYMENT_NOTICE`) within the reply window
 - `Confirmation` rows (append-only, latest valid reply wins) and audit entries `RECEIPT_CONFIRMED`, `RECEIPT_NOT_RECEIVED`, `RECEIPT_UNPARSEABLE`
 - Routing DC messages to `handle_dc_whatsapp_command(db, *, sender_phone_hash, body, provider_message_id, received_at)` in `app/services/triggers/dc_commands.py` (FR8) and rendering its `DcCommandResult` back to the DC
@@ -82,12 +82,12 @@ Own the inbound WhatsApp webhook. Check that each message really comes from Twil
 
 ## Definition of Done
 - [ ] All tests above written first, seen failing, now green
-- [ ] The parser corpus (≥ 40 cases, including `۱`, `١`, `１`, RLM-wrapped digits, `1.`, `ہاں`, `12`, `1 2`, empty, media-only) passes
+- [ ] The parser corpus (≥ 40 cases, including `1` (Urdu digits), `1` (Arabic-Indic digits), `１`, RLM-wrapped digits, `1.`, `12`, `1 2`, empty, media-only) passes
 - [ ] Three identical deliveries of one `MessageSid` produce one `Confirmation`, one audit entry and one ack (test)
 - [ ] `APPROVE 123456` from the Dadu DC phone calls the FR8 handler once and the DC gets the rendered result; the same text from a beneficiary phone does not (tests)
 - [ ] Bad signature → 403 and no writes (contract test)
 - [ ] `receipt_counts` matches a hand-computed fixture for confirmed / not received / no reply (test)
-- [ ] Live sandbox check: replying `1` and `۱` from the hero phone marks the receipt Confirmed within 5 s (manual)
+- [ ] Live sandbox check: replying `1` and `1` (Urdu digits) from the hero phone marks the receipt Confirmed within 5 s (manual)
 - [ ] `ruff` and `mypy --strict app/services/messaging` clean
 
 ## Hand-off notes

@@ -21,12 +21,12 @@
 ```yaml
 version: 1
 shared:
-  line.demo: {ur: "(آزمائشی پیغام، یہ اصل رقم نہیں ہے)", en: "(DEMO message, this is not real money)"}
-  wallet.JAZZCASH: {ur: "جاز کیش", en: "JazzCash"}
-  wallet.EASYPAISA: {ur: "ایزی پیسہ", en: "Easypaisa"}
-  tier.WATCH: {ur: "نگرانی", en: "Watch"}
-  tier.WARNING: {ur: "خبردار", en: "Warning"}
-  tier.ACTION: {ur: "فوری خطرہ", en: "Action"}
+  line.demo: {ur: "[Urdu text]", en: "(DEMO message, this is not real money)"}
+  wallet.JAZZCASH: {ur: "[Urdu text]", en: "JazzCash"}
+  wallet.EASYPAISA: {ur: "[Urdu text]", en: "Easypaisa"}
+  tier.WATCH: {ur: "[Urdu text]", en: "Watch"}
+  tier.WARNING: {ur: "[Urdu text]", en: "Warning"}
+  tier.ACTION: {ur: "[Urdu text]", en: "Action"}
 templates:
   payment_notice:
     purpose: PAYMENT_NOTICE
@@ -36,11 +36,6 @@ templates:
     demo_line: true
     variables: [amount, wallet_ur, wallet_en, ref]
     ur: |-
-      آب و حساب: {amount} روپے آپ کے {wallet_ur} اکاؤنٹ میں بھیج دیے گئے ہیں۔
-      رقم {wallet_ur} ایجنٹ کی دکان یا ایپ سے نکالیں۔
-      یہ رقم مفت ہے۔ کسی کو فیس یا اپنا پن نہ دیں۔
-      رقم مل گئی تو 1 بھیجیں۔ نہیں ملی تو 2 بھیجیں۔
-      حوالہ: {ref}
     en: |-
       Aab o Hisaab: Rs {amount} has been sent to your {wallet_en} account.
       Cash it at a {wallet_en} agent shop or in the app.
@@ -322,7 +317,6 @@ def notify_tier_change(db, *, event, releases, risk_index, direction, triggered_
 | `DEMO_PHONES` | — | JSON `{"dc.dadu@sindh.demo": "+923…", "officer@pdma-sindh.demo": "+923…", "hero_beneficiary": "+923…"}`; never committed |
 | Flag `FR22_OUTCOME` | off | Enables `OUTCOME_SURVEY` enqueue |
 
-**Seed Urdu district names** (hand to the foundation owner for `data/seeds/districts.yaml` once `name_ur` is merged): Dadu دادو · Larkana لاڑکانہ · Qambar Shahdadkot قمبر شہدادکوٹ · Jacobabad جیکب آباد · Khairpur خیرپور · Sanghar سانگھڑ · Mirpurkhas میرپور خاص · Buner بونیر · Swat سوات · Shangla شانگلہ · Charsadda چارسدہ · Nowshera نوشہرہ.
 
 ## Commands
 

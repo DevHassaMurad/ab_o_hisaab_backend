@@ -81,7 +81,7 @@ The field agent (in the MVP, the DC office or PDMA officer on their behalf) clos
 
 ### User Story 5 - SMS replies count (Priority: P2, roadmap build)
 
-A beneficiary replies `1` or `۲` to the SMS. The reply is parsed exactly like a WhatsApp reply and recorded with channel SMS.
+A beneficiary replies `1` or `2` (Urdu digits) to the SMS. The reply is parsed exactly like a WhatsApp reply and recorded with channel SMS.
 
 **Why this priority**: An SMS that cannot be answered only half-solves the problem.
 
@@ -128,26 +128,26 @@ Waiting 6 hours is pointless if WhatsApp already failed. If the WhatsApp notice 
 
 SMS texts are short, Urdu first, then English, and must fit 3 Unicode SMS parts (≤ 201 characters including variables at typical lengths).
 
-| Key | Urdu | English |
-|---|---|---|
-| `sms.payment_notice` | آب و حساب: {amount} روپے {wallet_ur} میں بھیجے گئے۔ ملے تو 1، نہ ملے تو 2 بھیجیں۔ | Rs {amount} sent to your {wallet_en}. Reply 1 if received, 2 if not. Ref {ref} |
-| `sms.tier_alert.WARNING` | آب و حساب: {district_ur} میں سیلاب کا بڑا خطرہ۔ اونچی جگہ جانے کی تیاری کریں۔ | High flood risk in {district}. Get ready to move to high ground. |
-| `sms.tier_alert.ACTION` | آب و حساب: {district_ur} میں سیلاب آنے والا ہے۔ ابھی اونچی جگہ جائیں۔ | Flood coming to {district}. Go to high ground now. |
-| `sms.line.demo` | (آزمائشی) | (DEMO) |
+| Key | English |
+|---|---|
+| `sms.payment_notice` | Rs {amount} sent to your {wallet_en}. Reply 1 if received, 2 if not. Ref {ref} |
+| `sms.tier_alert.WARNING` | High flood risk in {district}. Get ready to move to high ground. |
+| `sms.tier_alert.ACTION` | Flood coming to {district}. Go to high ground now. |
+| `sms.line.demo` | (DEMO) |
 
 Rendered as one SMS: Urdu line, newline, English line, then `sms.line.demo` when simulated.
 
 Field-agent brief (`field_task.brief`, stored as the `FIELD_AGENT` alert text and shown on the task):
 
-| Urdu | English |
-|---|---|
-| فیلڈ کام: حوالہ {ref}، تحصیل {tehsil}۔ مستحق سے پوچھیں کہ کیا {amount} روپے مل گئے۔ وجہ: {reason_ur}۔ | Field task: ref {ref}, tehsil {tehsil}. Ask the beneficiary if Rs {amount} was received. Reason: {reason_en}. |
+| English |
+|---|
+| Field task: ref {ref}, tehsil {tehsil}. Ask the beneficiary if Rs {amount} was received. Reason: {reason_en}. |
 
-| `reason_code` | `reason_ur` | `reason_en` |
-|---|---|---|
-| `NO_REPLY_12H` | 12 گھنٹے سے کوئی جواب نہیں | no reply after 12h |
-| `INVALID_PHONE` | فون نمبر درست نہیں | invalid phone number |
-| `NOT_RECEIVED` | مستحق کے مطابق رقم نہیں ملی | beneficiary reports not received |
+| `reason_code` | `reason_en` |
+|---|---|
+| `NO_REPLY_12H` | no reply after 12h |
+| `INVALID_PHONE` | invalid phone number |
+| `NOT_RECEIVED` | beneficiary reports not received |
 
 ## Requirements *(mandatory)*
 

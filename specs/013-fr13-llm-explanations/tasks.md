@@ -50,7 +50,7 @@ Build only this part in the 32-hour MVP (Principle X).
 **Independent Test**: `pytest tests/unit/explain/test_guardrails.py`
 
 ### Tests (write first)
-- [ ] T011 [P] [US2] Number tests: invented number rejected; Urdu digits ۸۲ and Arabic-Indic ٨٢ accepted for 82; "15,000", "15 ہزار", "1.5 lakh" vs 150000; number words ("two", "دو"); date parts (24, 8, 2022, "24-08"); percent 0.91 ↔ 91; "82/100" in `tests/unit/explain/test_guardrails.py`
+- [ ] T011 [P] [US2] Number tests: invented number rejected; Urdu digits 82 (Urdu digits) and Arabic-Indic 82 (Arabic-Indic digits) accepted for 82; "15,000", "15 [Urdu text]", "1.5 lakh" vs 150000; number words ("two", "[Urdu text]"); date parts (24, 8, 2022, "24-08"); percent 0.91 ↔ 91; "82/100" in `tests/unit/explain/test_guardrails.py`
 - [ ] T012 [P] [US2] Content tests: missing score, tier mismatch (EN and UR labels), Urdu slot in English, too long, URL, phone-like digits, markdown, two line breaks in `tests/unit/explain/test_guardrails.py`
 - [ ] T013 [P] [US2] Whitelist test: allocation facts never include name/phone/cnic/wallet_id/lat/lon even if present on the row in `tests/unit/explain/test_guardrails.py -k whitelist`
 

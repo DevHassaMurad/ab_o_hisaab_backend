@@ -176,7 +176,7 @@ DONOR → 403 `FORBIDDEN_ROLE` on every route except `GET /allocation-rules`. DC
       "id": "a1…",
       "rank": 1,
       "type": "HOUSEHOLD",
-      "beneficiary": {"id": "6f1c…", "register_ref": "SYN-PK60501-H-00042", "name": "غلام رسول",
+      "beneficiary": {"id": "6f1c…", "register_ref": "SYN-PK60501-H-00042", "name": "Ghulam Rasool",
                       "tehsil": {"id": "…", "pcode": "PK60501", "name": "Dadu"}, "simulated": true},
       "priority_score": 81.23,
       "computed_amount_pkr": "7000.00",
@@ -184,7 +184,7 @@ DONOR → 403 `FORBIDDEN_ROLE` on every route except `GET /allocation-rules`. DC
       "status": "FUNDED",
       "override_reason": null,
       "overridden_by": null,
-      "reason_ur": "دادو کے 1,240 گھرانوں میں آپ کا نمبر 1 ہے۔ …",
+      "reason_ur": "[Urdu text]",
       "reason_en": "Rank 1 of 1,240 households in Dadu. Priority 81.23/100 because …",
       "simulated": true
     }

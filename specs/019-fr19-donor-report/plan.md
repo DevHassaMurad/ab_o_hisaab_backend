@@ -187,7 +187,7 @@ Errors: 403 `NO_LINKED_FUNDS`, 403 `FUND_NOT_LINKED`, 403 `ROLE_FORBIDDEN` (DC).
 {
   "items": [{
     "story_key": "dadu-shop-stock-01", "district_pcode": "PK605", "beneficiary_type": "SHOPKEEPER", "tier": "WARNING",
-    "title_en": "Stock moved to higher ground", "title_ur": "سامان اونچی جگہ منتقل",
+    "title_en": "Stock moved to higher ground", "title_ur": "[Urdu text]",
     "body_en": "A grocery shopkeeper in Johi tehsil used the Warning grant to hire a cart and move rice and flour…",
     "body_ur": "…",
     "source": "CURATED", "label": "Illustrative story (simulated)", "group_size": null, "simulated": true
