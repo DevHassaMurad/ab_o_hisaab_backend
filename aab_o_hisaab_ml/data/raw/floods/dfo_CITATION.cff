@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite it as below."
+authors:
+  - name: “DFO - Flood Observatory (DFO)”
+title: "Global Flood Records"
+type: dataset
+version: “0.9.0”
+identifiers:
+  - type: doi
+    value: “10.5281/zenodo.19288171”
+date-released: “2025-03-28”
+abstract: “A comprehensive global collection of large flood events from January 1985 to December 2023”
+keywords: 
+  - large flood events
+  - “time-series”
+license: CC-0
+url: https://floodobservatory.colorado.edu/wiki/FloodRecords
+Contact:
+  - email: “albert.kettner@gmail.com”
+    Name: “Albert Kettner”

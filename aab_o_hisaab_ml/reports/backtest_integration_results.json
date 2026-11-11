@@ -1,0 +1,390 @@
+{
+  "model_used": "rf_plain",
+  "validation_threshold": 0.3419,
+  "sindh_aug_2022_top_districts": {
+    "Sujawal": {
+      "max_score": 97.4,
+      "max_prob": 0.9744045937722409,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-05"
+    },
+    "Thatta": {
+      "max_score": 95.1,
+      "max_prob": 0.951466581091194,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-06"
+    },
+    "Malir Karachi": {
+      "max_score": 94.6,
+      "max_prob": 0.9456310598872515,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-05"
+    },
+    "Badin": {
+      "max_score": 93.0,
+      "max_prob": 0.9299432563766927,
+      "first_watch": "2022-08-10",
+      "first_action": "2022-08-15"
+    },
+    "Kambar Shahdad Kot": {
+      "max_score": 91.7,
+      "max_prob": 0.9165066984672251,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-05"
+    },
+    "South Karachi": {
+      "max_score": 91.7,
+      "max_prob": 0.9167531833777963,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-05"
+    },
+    "Central Karachi": {
+      "max_score": 91.5,
+      "max_prob": 0.915419850044463,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-05"
+    },
+    "Korangi Karachi": {
+      "max_score": 91.5,
+      "max_prob": 0.915419850044463,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-05"
+    },
+    "West Karachi": {
+      "max_score": 91.5,
+      "max_prob": 0.915419850044463,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-05"
+    },
+    "East Karachi": {
+      "max_score": 91.5,
+      "max_prob": 0.915419850044463,
+      "first_watch": "2022-08-05",
+      "first_action": "2022-08-05"
+    }
+  },
+  "dadu_aug_2022_daily_progression": [
+    {
+      "date": "2022-08-05",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 45.0,
+      "gwettop": 0.71,
+      "gwetroot": 0.69,
+      "prob": 0.244,
+      "risk_score": 24.4,
+      "tier": "Normal",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-06",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 59.15,
+      "gwettop": 0.77,
+      "gwetroot": 0.71,
+      "prob": 0.512,
+      "risk_score": 51.2,
+      "tier": "Watch",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-07",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 45.99,
+      "gwettop": 0.755,
+      "gwetroot": 0.73,
+      "prob": 0.554,
+      "risk_score": 55.4,
+      "tier": "Watch",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-08",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 48.13,
+      "gwettop": 0.745,
+      "gwetroot": 0.725,
+      "prob": 0.398,
+      "risk_score": 39.8,
+      "tier": "Normal",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-09",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 50.24,
+      "gwettop": 0.75,
+      "gwetroot": 0.72,
+      "prob": 0.433,
+      "risk_score": 43.3,
+      "tier": "Watch",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-10",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 115.15,
+      "gwettop": 0.85,
+      "gwetroot": 0.76,
+      "prob": 0.829,
+      "risk_score": 82.9,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-11",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 123.495,
+      "gwettop": 0.83,
+      "gwetroot": 0.8,
+      "prob": 0.899,
+      "risk_score": 89.9,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-12",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 123.25,
+      "gwettop": 0.8,
+      "gwetroot": 0.78,
+      "prob": 0.871,
+      "risk_score": 87.1,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-13",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 101.51,
+      "gwettop": 0.83,
+      "gwetroot": 0.785,
+      "prob": 0.894,
+      "risk_score": 89.4,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-14",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 115.375,
+      "gwettop": 0.855,
+      "gwetroot": 0.81,
+      "prob": 0.892,
+      "risk_score": 89.2,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-15",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 156.88,
+      "gwettop": 0.88,
+      "gwetroot": 0.83,
+      "prob": 0.906,
+      "risk_score": 90.6,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-16",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 185.295,
+      "gwettop": 0.895,
+      "gwetroot": 0.865,
+      "prob": 0.91,
+      "risk_score": 91.0,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-17",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 143.7,
+      "gwettop": 0.885,
+      "gwetroot": 0.87,
+      "prob": 0.899,
+      "risk_score": 89.9,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-18",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 337.185,
+      "gwettop": 0.975,
+      "gwetroot": 0.93,
+      "prob": 0.878,
+      "risk_score": 87.8,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-19",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 482.705,
+      "gwettop": 0.985,
+      "gwetroot": 0.98,
+      "prob": 0.867,
+      "risk_score": 86.7,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-20",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 485.02,
+      "gwettop": 0.955,
+      "gwetroot": 0.985,
+      "prob": 0.874,
+      "risk_score": 87.4,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-21",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 495.47,
+      "gwettop": 0.96,
+      "gwetroot": 0.975,
+      "prob": 0.886,
+      "risk_score": 88.6,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-22",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 453.165,
+      "gwettop": 0.945,
+      "gwetroot": 0.97,
+      "prob": 0.901,
+      "risk_score": 90.1,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-23",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 478.745,
+      "gwettop": 0.965,
+      "gwetroot": 0.975,
+      "prob": 0.897,
+      "risk_score": 89.7,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-24",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 588.055,
+      "gwettop": 0.98,
+      "gwetroot": 0.995,
+      "prob": 0.883,
+      "risk_score": 88.3,
+      "tier": "Action",
+      "flood_next_7d": 1
+    },
+    {
+      "date": "2022-08-25",
+      "district_name": "Dadu",
+      "flood_mode": "slow",
+      "rain_7d": 439.71,
+      "gwettop": 0.98,
+      "gwetroot": 0.995,
+      "prob": 0.883,
+      "risk_score": 88.3,
+      "tier": "Action",
+      "flood_next_7d": 1
+    }
+  ],
+  "kp_monsoon_2025_top_districts": {
+    "Haripur": {
+      "max_score": 98.3,
+      "max_prob": 0.9826379176379179,
+      "max_rain_7d": 172.01000000000008,
+      "max_gwettop": 0.97
+    },
+    "Abbottabad": {
+      "max_score": 97.8,
+      "max_prob": 0.9781087246087246,
+      "max_rain_7d": 172.01000000000008,
+      "max_gwettop": 0.97
+    },
+    "Swabi": {
+      "max_score": 96.9,
+      "max_prob": 0.9687612124717387,
+      "max_rain_7d": 155.28000000000006,
+      "max_gwettop": 0.92
+    },
+    "Buner": {
+      "max_score": 77.0,
+      "max_prob": 0.7698821731817087,
+      "max_rain_7d": 110.85,
+      "max_gwettop": 0.86
+    },
+    "Kohat": {
+      "max_score": 76.3,
+      "max_prob": 0.7629336799251656,
+      "max_rain_7d": 198.39000000000001,
+      "max_gwettop": 0.825
+    },
+    "Charsadda": {
+      "max_score": 58.1,
+      "max_prob": 0.5807687323569675,
+      "max_rain_7d": 171.70999999999998,
+      "max_gwettop": 0.83
+    },
+    "Nowshera": {
+      "max_score": 58.0,
+      "max_prob": 0.5795672671555022,
+      "max_rain_7d": 171.70999999999998,
+      "max_gwettop": 0.83
+    },
+    "Peshawar": {
+      "max_score": 57.8,
+      "max_prob": 0.5775159851042201,
+      "max_rain_7d": 171.70999999999998,
+      "max_gwettop": 0.83
+    },
+    "Karak": {
+      "max_score": 36.6,
+      "max_prob": 0.3661564828127399,
+      "max_rain_7d": 150.14000000000004,
+      "max_gwettop": 0.76
+    },
+    "Khyber": {
+      "max_score": 7.1,
+      "max_prob": 0.07068745829761035,
+      "max_rain_7d": 140.89999999999998,
+      "max_gwettop": 0.71
+    }
+  },
+  "control_year_2021_sindh_monsoon": {
+    "sindh_2021_monsoon_district_days": 3538,
+    "action_tier_triggers": 0,
+    "warning_tier_triggers": 1,
+    "watch_tier_triggers": 2,
+    "mean_risk_score_2021": 0.26,
+    "p95_risk_score_2021": 1.0
+  }
+}
