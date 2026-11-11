@@ -1,6 +1,7 @@
 from sqlalchemy import select, or_
 from pwdlib import PasswordHash
 from model.user_model import User
+from model.role_model import Role
 from config.jwt_handler import JwtHandler
 
 
@@ -34,7 +35,15 @@ class Authentication:
         ).scalar_one_or_none()
 
         if user and self.password.verify(data["password"], user.password):
-            access_token = self.jwt_handler.create_token(user_id=user.id)
+            if not user.is_active:
+                return {"error": "This account is disabled. Contact your PDMA administrator."}, 403
+            role = self.db_session.get(Role, user.role_id)
+            if role is None or role.name == "UNASSIGNED":
+                return {"error": "This account has no role yet. Contact your PDMA administrator."}, 403
+            access_token = self.jwt_handler.create_token(
+                user_id=user.id, role=role.name, district_id=user.district_id,
+                name=user.name, email=user.email,
+            )
 
             return {
                 "message": "Authentication successful.",
