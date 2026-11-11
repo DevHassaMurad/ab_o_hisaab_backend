@@ -11,5 +11,6 @@ imbalanced-learn
 xgboost
 matplotlib
 joblib
+shap
 earthengine-api
 openpyxl

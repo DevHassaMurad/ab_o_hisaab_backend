@@ -1,0 +1,234 @@
+{
+  "challenge": "C06 \u2014 Explainability & Feature Attribution (XAI / Regulatory Audit)",
+  "model": "Random Forest (rf_plain, 300 trees, max_depth=14)",
+  "explainer": "SHAP TreeExplainer (shap v0.54.1)",
+  "base_prior_probability": 0.0052,
+  "decision_threshold": 0.3419,
+  "edge_cases": [
+    {
+      "case_id": "Edge Case 1 \u2014 Low 7-Day Local Rain, High Slow-Flood Approval",
+      "district_name": "Sujawal",
+      "province": "Sindh",
+      "date": "2022-08-04",
+      "flood_mode": "slow",
+      "actual_flood_next_7d": 1,
+      "base_expected_probability": 0.0052,
+      "predicted_probability": 0.9185,
+      "risk_score_0_100": 91.8,
+      "validation_threshold": 0.3419,
+      "ml_binary_decision": "APPROVED (Flood Alert = 1)",
+      "funding_tier": "ACTION TIER (Score >= 80)",
+      "payout_release_pct": 60,
+      "regulatory_action": "Release 60% Parametric Payout (with DC Confirmation)",
+      "why_edge_case": "Only 2.57 mm of local rain fell in the prior 7 days, which a naive rainfall rule would reject. However, 407.1 mm of 30-day monsoon rain and upstream Indus basin inflows pushed Sujawal's surface and root-zone soil wetness to 102.8% and 105.5% of its 99th-percentile threshold, triggering an Action Tier approval (91.8/100).",
+      "top_shap_drivers": [
+        {
+          "feature": "gwettop_rel_q99",
+          "label": "Surface Soil Wetness vs Q99 (gwettop_rel_q99)",
+          "feature_value": 1.028,
+          "shap_contribution": 0.2559,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetroot_rel_q99",
+          "label": "Root-Zone Wetness vs Q99 (gwetroot_rel_q99)",
+          "feature_value": 1.0554,
+          "shap_contribution": 0.2124,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetroot",
+          "label": "Root-Zone Soil Wetness (gwetroot)",
+          "feature_value": 0.81,
+          "shap_contribution": 0.093,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "rain_30d",
+          "label": "30-Day Cumulative Rainfall (rain_30d)",
+          "feature_value": 407.0875,
+          "shap_contribution": 0.0719,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetprof_rel_q99",
+          "label": "Deep Profile Wetness vs Q99 (gwetprof_rel_q99)",
+          "feature_value": 1.063,
+          "shap_contribution": 0.0673,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetroot_anom",
+          "label": "Root-Zone Wetness Z-Anomaly (gwetroot_anom)",
+          "feature_value": 0.0425,
+          "shap_contribution": 0.0663,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwettop",
+          "label": "Surface Soil Wetness (gwettop)",
+          "feature_value": 0.805,
+          "shap_contribution": 0.0577,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetprof",
+          "label": "Profile Soil Wetness (gwetprof)",
+          "feature_value": 0.7925,
+          "shap_contribution": 0.0557,
+          "direction": "Increases Flood Risk (+)"
+        }
+      ]
+    },
+    {
+      "case_id": "Edge Case 2 \u2014 Extreme 7-Day Rain Burst on Dry Soil -> Rejected",
+      "district_name": "Mirpur Khas",
+      "province": "Sindh",
+      "date": "2021-05-22",
+      "flood_mode": "slow",
+      "actual_flood_next_7d": 0,
+      "base_expected_probability": 0.0052,
+      "predicted_probability": 0.161,
+      "risk_score_0_100": 16.1,
+      "validation_threshold": 0.3419,
+      "ml_binary_decision": "REJECTED (No Flood = 0)",
+      "funding_tier": "NORMAL / NO TRIGGER (Score < 40)",
+      "payout_release_pct": 0,
+      "regulatory_action": "Hold Funds (0% Disbursement \u2014 Soil Capacity Absorbs Rain)",
+      "why_edge_case": "An extreme 244.28 mm 7-day pre-monsoon cloudburst hit Mirpur Khas in May 2021. A simple rainfall threshold would falsely trigger a payout, but the model REJECTS the payout (Risk = 16.1/100 < 34.2% threshold) because pre-storm soil wetness was extremely dry (gwettop = 0.33, just 44% of Q99), allowing the parched ground to absorb the rain.",
+      "top_shap_drivers": [
+        {
+          "feature": "rain_14d",
+          "label": "14-Day Cumulative Rainfall (rain_14d)",
+          "feature_value": 244.46,
+          "shap_contribution": 0.104,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "rain_7d",
+          "label": "7-Day Cumulative Rainfall (rain_7d)",
+          "feature_value": 244.28,
+          "shap_contribution": 0.0251,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "rain_30d",
+          "label": "30-Day Cumulative Rainfall (rain_30d)",
+          "feature_value": 246.4,
+          "shap_contribution": 0.0183,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "rain_max1d_7d",
+          "label": "rain_max1d_7d",
+          "feature_value": 215.04,
+          "shap_contribution": 0.0118,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "rain_30d_anom",
+          "label": "30-Day Rain Z-Anomaly (rain_30d_anom)",
+          "feature_value": 13.9583,
+          "shap_contribution": 0.0064,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwettop_rel_q99",
+          "label": "Surface Soil Wetness vs Q99 (gwettop_rel_q99)",
+          "feature_value": 0.44,
+          "shap_contribution": -0.006,
+          "direction": "Decreases Flood Risk (-)"
+        },
+        {
+          "feature": "prov_rain_7d",
+          "label": "Provincial 7-Day Rain (prov_rain_7d)",
+          "feature_value": 77.8386,
+          "shap_contribution": 0.0043,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwettop",
+          "label": "Surface Soil Wetness (gwettop)",
+          "feature_value": 0.33,
+          "shap_contribution": -0.0037,
+          "direction": "Decreases Flood Risk (-)"
+        }
+      ]
+    },
+    {
+      "case_id": "Edge Case 3 \u2014 Borderline Threshold Decision (Watch Tier Approval)",
+      "district_name": "Muzaffarabad",
+      "province": "Azad Kashmir",
+      "date": "2021-04-13",
+      "flood_mode": "flash",
+      "actual_flood_next_7d": 1,
+      "base_expected_probability": 0.0052,
+      "predicted_probability": 0.4487,
+      "risk_score_0_100": 44.9,
+      "validation_threshold": 0.3419,
+      "ml_binary_decision": "APPROVED (Flood Alert = 1)",
+      "funding_tier": "WATCH TIER (Score 40\u201359 / Above ML Threshold)",
+      "payout_release_pct": 10,
+      "regulatory_action": "Release 10% Early Preparedness Tranche",
+      "why_edge_case": "7-day rainfall was modest (12.39 mm) and the model probability (0.4487) sits just above the 0.3419 validation threshold (Watch Tier: 10% early preparedness release). SHAP shows that root-zone saturation exceeding Q99 (101.3%) and 30-day cumulative spring precipitation (174.4 mm) tipped the decision from Hold into Watch.",
+      "top_shap_drivers": [
+        {
+          "feature": "gwetroot_rel_q99",
+          "label": "Root-Zone Wetness vs Q99 (gwetroot_rel_q99)",
+          "feature_value": 1.0128,
+          "shap_contribution": 0.1493,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetroot",
+          "label": "Root-Zone Soil Wetness (gwetroot)",
+          "feature_value": 0.79,
+          "shap_contribution": 0.0688,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwettop",
+          "label": "Surface Soil Wetness (gwettop)",
+          "feature_value": 0.85,
+          "shap_contribution": 0.0571,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetroot_anom",
+          "label": "Root-Zone Wetness Z-Anomaly (gwetroot_anom)",
+          "feature_value": 0.01,
+          "shap_contribution": 0.0568,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetprof_rel_q99",
+          "label": "Deep Profile Wetness vs Q99 (gwetprof_rel_q99)",
+          "feature_value": 1.0133,
+          "shap_contribution": 0.0529,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwetprof",
+          "label": "Profile Soil Wetness (gwetprof)",
+          "feature_value": 0.76,
+          "shap_contribution": 0.0407,
+          "direction": "Increases Flood Risk (+)"
+        },
+        {
+          "feature": "gwettop_rel_q99",
+          "label": "Surface Soil Wetness vs Q99 (gwettop_rel_q99)",
+          "feature_value": 0.9659,
+          "shap_contribution": -0.021,
+          "direction": "Decreases Flood Risk (-)"
+        },
+        {
+          "feature": "gwr_q99",
+          "label": "gwr_q99",
+          "feature_value": 0.78,
+          "shap_contribution": 0.0132,
+          "direction": "Increases Flood Risk (+)"
+        }
+      ]
+    }
+  ]
+}
