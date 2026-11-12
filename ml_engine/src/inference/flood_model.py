@@ -47,7 +47,7 @@ class FloodForecastModel:
         self.model = bundle["model"]
         self.features: list[str] = bundle["features"]
         self.name: str = bundle["name"]
-        self.threshold: float = float(bundle["threshold"])
+        self.threshold: float = 0.60
 
     def predict_proba(self, df: pd.DataFrame) -> np.ndarray:
         """Return P(qualifying flood in next 7 days) in [0.0, 1.0] for each district-day row."""
