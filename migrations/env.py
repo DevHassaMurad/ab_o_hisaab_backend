@@ -11,6 +11,7 @@ from model.fund_model import DonorDonation  # noqa: F401
 from model.campaign_model import DonationCampaign  # noqa: F401
 from model.forecast_model import ForecastDistrict  # noqa: F401
 from model.beneficiary_model import BeneficiaryFundRequest  # noqa: F401
+from model.campaign_finance_model import CampaignMasterBatch, CollaborationCampaign  # noqa: F401
 
 config = context.config
 target_metadata = Base.metadata

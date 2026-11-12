@@ -1,8 +1,8 @@
 """PDMA weather, flood and hazard forecasting.
 
-Prediction engine: the team's trained C02 flood model (aab_o_hisaab_ml/models/flood_model.joblib, a random forest).
+Prediction engine: the team's trained C02 flood model (ml_engine/models/flood_model.joblib, a random forest).
 It gives, for each district and day t, the probability of a qualifying flood on any of days t+1..t+7. Features are
-rebuilt here exactly as in aab_o_hisaab_ml/src/data/s05_build_dataset.py from NASA POWER daily data, using the
+rebuilt here exactly as in ml_engine/src/data/s05_build_dataset.py from NASA POWER daily data, using the
 district climatology from the training years (2000-2014) only.
 
 The map score is "Model Risk Score (%)" = model probability x 100. Random-forest probabilities are NOT calibrated,
@@ -39,7 +39,7 @@ from model.forecast_model import (
 
 log = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parent.parent
-ML = ROOT / "aab_o_hisaab_ml"
+ML = ROOT / "ml_engine"
 GEO = ROOT / "data" / "geo"
 CACHE = ROOT / "storage" / "nasa_power"
 PKT = timedelta(hours=5)
@@ -366,6 +366,8 @@ def score_districts(db, trigger="schedule"):
                     "inputs": {k: round(float(last[k]), 4) for k in (
                         "rain_1d", "rain_3d", "rain_7d", "rain_30d", "rain_7d_anom", "gwettop", "gwetroot", "gwetprof",
                         "gwettop_rel_q99", "gwetroot_rel_q99", "gwetprof_rel_q99", "t2m", "t2m_max", "rh2m")},
+                    # the exact 39-feature row the model scored: used by the C06 TreeSHAP explanation
+                    "features": {k: float(last[k]) for k in features},
                 }))
         db.bulk_insert_mappings(DistrictRiskAssessment, rows)
         db.commit()

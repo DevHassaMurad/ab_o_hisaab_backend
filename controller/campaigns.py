@@ -617,6 +617,10 @@ class Campaigns:
         else:
             x.payment_status = "verified"
             x.verified_by, x.verified_at = self.user.id, now_utc()
+            from controller.campaign_finance import post_contribution
+
+            self.db.flush()
+            post_contribution(self.db, x, c, self.user.id)  # credit the campaign master batch once
             self._notify([donor.id], "campaign_contribution_verified", "Campaign payment confirmed",
                          f"Your contribution of {pkr(x.amount)} to {c.name} ({x.reference_no}) was confirmed.",
                          c, "campaign")

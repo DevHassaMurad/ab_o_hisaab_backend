@@ -7,7 +7,7 @@ import shapefile
 from shapely.geometry import mapping, shape
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "aab_o_hisaab_ml" / "data" / "raw" / "boundaries"
+SRC = ROOT / "ml_engine" / "data" / "raw" / "boundaries"
 OUT = ROOT / "data" / "geo"
 
 

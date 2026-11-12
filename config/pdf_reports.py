@@ -403,3 +403,60 @@ def ledger_pdf(ledger, owner, generated_utc):
         story.append(Paragraph(f"Transfers recorded but not yet sent ({pkr(ledger['pending_transfers'])}) are not "
                                "included until they are sent.", SMALL))
     return _build(story, ledger["title"], "Funds ledger - Official record")
+
+
+
+def campaign_statement_pdf(o, generated_utc):
+    """Complete PDMA campaign financial report: master batch, contributions (no donor contact data), NGO
+    collaborations with released / received / distributed / remaining, and the reconciliation line."""
+    c = o["campaign"]
+    story = [
+        Paragraph(f"Campaign financial statement - {_esc(c['name'])}", H1), Spacer(1, 3 * mm),
+        _key_values([("Campaign", f"{_esc(c['name'])} ({c['reference_no']})"), ("District", _esc(c.get("district") or "-")),
+                     ("Master batch", o.get("master_batch_reference") or "Not created yet"),
+                     ("Generated", _generated(generated_utc))]),
+        Paragraph("Summary", H2),
+        _kpis([("Verified collection", pkr(o["collected"])), ("Assigned to NGOs", pkr(o["assigned"])),
+               ("Released to NGOs", pkr(o["released"])), ("In transit", pkr(o["in_transit"])),
+               ("Held by NGOs", pkr(o["ngo_held"])), ("Distributed to beneficiaries", pkr(o["distributed"])),
+               ("Unallocated at PDMA", pkr(o["master_available"])), ("Total unspent", pkr(o["unspent"]))]),
+        Spacer(1, 2 * mm),
+        Paragraph("Reconciliation: verified collection = unallocated at PDMA + in transit + held by NGOs + distributed. "
+                  + ("Balanced." if o.get("reconciles") else "NOT BALANCED - investigate."), SMALL),
+        Paragraph("NGO collaborations", H2),
+        _table(["Collaboration", "NGO", "Sub-batch", "Assigned", "Received", "Distributed", "Remaining"],
+               [[x["reference_no"], _esc(x["ngo"]["name"]), x.get("batch_reference") or "-", pkr(x["assigned"]),
+                 pkr(x["received"]), pkr(x["distributed"]), pkr(x["available"])] for x in o["collaborations"]],
+               [24 * mm, 34 * mm, 26 * mm, 24 * mm, 24 * mm, 24 * mm, 24 * mm], numeric_cols=(3, 4, 5, 6)),
+        Paragraph("Verified contributions (master batch sources)", H2),
+        _table(["Contribution", "Donor", "Verified", "Amount", "Not yet released"],
+               [[x["reference_no"], _esc(x["donor"]), (x["verified_at"] or "")[:10], pkr(x["amount"]), pkr(x["unreleased"])]
+                for x in o["contributions"]],
+               [32 * mm, 50 * mm, 26 * mm, 36 * mm, 36 * mm], numeric_cols=(3, 4)),
+    ]
+    return _build(story, f"Campaign statement {c['reference_no']}", "Campaign financial statement - PDMA internal")
+
+
+def distribution_voucher_pdf(row, campaign, generated_utc):
+    """Beneficiary distribution voucher for one recorded payment (NGO / PDMA only)."""
+    status = "REVERSED" if row["status"] == "reversed" else "RECORDED"
+    story = [
+        Paragraph("BENEFICIARY DISTRIBUTION VOUCHER", H1), Spacer(1, 4 * mm),
+        Paragraph("Amount", SMALL), Paragraph(pkr(row["amount"]), ParagraphStyle("amt2", parent=H1, fontSize=20)),
+        Spacer(1, 3 * mm),
+        _key_values([("Voucher", row["reference_no"]), ("Status", status),
+                     ("Beneficiary", f"{_esc(row['beneficiary']['name'])} ({row['beneficiary']['type'].title()})"),
+                     ("Distribution date", row["distribution_date"]), ("Payment method", status_label(row["payment_method"])),
+                     ("Payment reference", _esc(row.get("payment_reference") or "Not provided")),
+                     ("Distribution campaign", f"{_esc(campaign['name'])} ({campaign['reference_no']})"),
+                     ("Source batch", campaign["batch"]["reference_no"]),
+                     ("Collaboration", campaign["collaboration"]["reference_no"]),
+                     ("Parent PDMA campaign", f"{_esc(campaign['parent_campaign']['name'])} "
+                                              f"({campaign['parent_campaign']['reference_no']})"),
+                     ("District", _esc(campaign["district"]))]
+                    + ([("Reversal reason", _esc(row["reversal_reason"]))] if row.get("reversal_reason") else [])),
+        Spacer(1, 8 * mm),
+        Paragraph(f"System-generated on {_generated(generated_utc, seconds=True)}. Funds are traced to the source batch "
+                  "and the original donor contributions in the Aab o Hisaab ledger.", SMALL),
+    ]
+    return _build(story, f"Distribution voucher {row['reference_no']}", "Distribution voucher - NGO record")

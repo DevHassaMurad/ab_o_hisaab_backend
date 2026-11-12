@@ -90,3 +90,34 @@ def refresh(background_tasks: BackgroundTasks, _=Depends(staff_only), db: Sessio
         raise AuthFlowError("REFRESH_TOO_SOON", "Data was refreshed recently. Try again in a few minutes.", 429)
     background_tasks.add_task(_refresh_job)
     return {"status": "started"}
+
+
+# Hackathon challenges C02 / C06 / C12 (ml_engine) ------------------------------------------------------------
+@router.get("/challenges")
+def challenges(_=Depends(staff_only)):
+    from controller.ml_challenges import challenges_overview
+
+    return challenges_overview()
+
+
+@router.get("/challenges/images/{key}")
+def challenge_image(key: Literal["c02-dashboard", "c02-final", "c02-pr-curve", "c06-shap", "c12-matrix"],
+                    _=Depends(staff_only)):
+    from controller.ml_challenges import image_path
+
+    return Response(image_path(key).read_bytes(), media_type="image/png",
+                    headers={"Cache-Control": "private, max-age=3600"})
+
+
+@router.get("/districts/{pcode}/explain")
+def district_explain(pcode: str, _=Depends(staff_only), db: Session = Depends(get_db)):
+    from controller.ml_challenges import explain_district
+
+    return explain_district(db, pcode[:12])
+
+
+@router.get("/districts/{pcode}/verification")
+def district_verification(pcode: str, _=Depends(staff_only), db: Session = Depends(get_db)):
+    from controller.ml_challenges import verify_district
+
+    return verify_district(db, pcode[:12])
