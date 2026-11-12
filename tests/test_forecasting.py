@@ -107,3 +107,43 @@ class ForecastApiTests(DonationFixture, unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ChallengeApiTests(DonationFixture, unittest.TestCase):
+    """C02/C06/C12 from ml_engine: reports, charts, live TreeSHAP and live cross-check; staff only."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        import joblib
+
+        from controller.forecasting import ML
+
+        bundle = joblib.load(ML / "models" / "flood_model.joblib")
+        feats = {f: 0.5 for f in bundle["features"]}
+        now = datetime.utcnow()
+        with cls.Session() as db:
+            db.add(ForecastDistrict(pcode="PK701", name="Dadu", province="Sindh", lat=26.7, lon=67.7, area_km2=8000.0,
+                                    flood_mode="slow", hist_floods_train=3, gwt_q99=0.8))
+            db.flush()
+            db.add(DistrictRiskAssessment(district_pcode="PK701", as_of_date=TODAY - timedelta(days=2), probability=0.1,
+                                          risk_score=10.0, risk_category="low", model_version="rf_plain@test",
+                                          data_completeness=1.0, calculated_at=now,
+                                          calculation_details={"inputs": {"rain_7d": 12.0}, "features": feats}))
+            db.commit()
+
+    def test_reports_images_and_permissions(self):
+        o = self.client.get("/api/forecast/challenges", headers=self.admin).json()
+        self.assertEqual(o["c02"]["status"], "PASS")
+        self.assertTrue(o["c06"]["edge_cases"] and o["c12"]["scenarios"])
+        img = self.client.get("/api/forecast/challenges/images/c06-shap", headers=self.admin)
+        self.assertEqual((img.status_code, img.content[:4]), (200, b"\x89PNG"))
+        self.assertEqual(self.client.get("/api/forecast/challenges", headers=self.donor).status_code, 403)
+
+    def test_live_shap_adds_up_and_cross_check(self):
+        e = self.client.get("/api/forecast/districts/PK701/explain", headers=self.admin).json()
+        self.assertTrue(e["available"])
+        self.assertAlmostEqual(e["check_sum"], e["predicted_probability"], places=3)
+        v = self.client.get("/api/forecast/districts/PK701/verification", headers=self.admin).json()
+        self.assertEqual(v["verification_result"], "INSUFFICIENT_DATA")  # no IMERG rows in the test database
+        self.assertFalse(v["modalities"]["sar_inundation"]["available"])

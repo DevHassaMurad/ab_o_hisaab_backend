@@ -62,31 +62,37 @@ class MigrationTests(unittest.TestCase):
         command.upgrade(self.config, "head")
         self.assertEqual(self.connection.scalar(text("SELECT role_id FROM users WHERE id=7")), 0)
         self.connection.commit()
+        command.downgrade(self.config, "-1")  # 0016 collaboration campaigns
+        self.assertFalse(inspect(self.connection).has_table("collaboration_campaigns"))
+        command.downgrade(self.config, "-1")  # 0015 campaign finance
+        for table in ("finance_ledger_entries", "campaign_collaborations", "ngo_distribution_campaigns"):
+            self.assertFalse(inspect(self.connection).has_table(table))
         command.downgrade(self.config, "-1")  # 0014 beneficiaries
         self.assertFalse(inspect(self.connection).has_table("beneficiary_fund_requests"))
         self.assertNotIn("adults", {c["name"] for c in inspect(self.connection).get_columns("householder_details")})
         command.downgrade(self.config, "0012_forecasting")  # leave the merge point (registration branch stays applied)
-        command.downgrade(self.config, "-1")  # 0012 forecasting
+        command.downgrade(self.config, "0011_campaigns")  # 0012 forecasting (explicit: two branches are applied)
         self.assertFalse(inspect(self.connection).has_table("district_risk_assessments"))
-        command.downgrade(self.config, "-1")  # 0011 campaigns
+        command.downgrade(self.config, "0010_donor_ledger")  # undo 0011 campaigns
         for table in ("donation_campaigns", "campaign_contributions", "campaign_documents", "campaign_events",
                       "campaign_notices"):
             self.assertFalse(inspect(self.connection).has_table(table))
-        command.downgrade(self.config, "-1")  # 0010 donor ledger
+        command.downgrade(self.config, "0009_fund_traceability")  # undo 0010 donor ledger
         self.assertNotIn("receipt_no", {c["name"] for c in inspect(self.connection).get_columns("donor_donations")})
-        command.downgrade(self.config, "-1")  # 0009 fund traceability
+        command.downgrade(self.config, "0008_ngo_portal")  # undo 0009 fund traceability
         for table in ("ngo_allocations", "allocation_funding_sources", "funding_disbursements", "fund_ledger_events"):
             self.assertFalse(inspect(self.connection).has_table(table))
-        command.downgrade(self.config, "-1")  # 0008 NGO portal
+        command.downgrade(self.config, "0007_ngo_expenditures")  # undo 0008 NGO portal
         self.assertFalse(inspect(self.connection).has_table("ngo_donation_requests"))
-        command.downgrade(self.config, "-1")  # 0007 NGO expenditures
+        command.downgrade(self.config, "0006_pdma_funds")  # undo 0007 NGO expenditures
         self.assertFalse(inspect(self.connection).has_table("ngo_expenditures"))
-        command.downgrade(self.config, "-1")  # 0006 PDMA fund ledger
+        command.downgrade(self.config, "0005_donor_response")  # undo 0006 PDMA fund ledger
         for table in ("donor_donations", "donation_disbursements", "email_outbox"):
             self.assertFalse(inspect(self.connection).has_table(table))
-        command.downgrade(self.config, "-1")  # 0005 donor response
+        command.downgrade(self.config, "0004_donations")  # undo 0005 donor response
         self.assertNotIn("donor_response", {c["name"] for c in inspect(self.connection).get_columns("donation_requests")})
-        command.downgrade(self.config, "-1")  # 0004 donations
+        command.downgrade(self.config, "0003_auth_verification")  # undo 0004 donations (and the registration branch)
+        command.upgrade(self.config, "0005_document_verification")  # re-apply the registration branch only
         for table in ("donation_requests", "donations", "fund_allocations", "notifications", "ngos"):
             self.assertFalse(inspect(self.connection).has_table(table))
         self.assertNotIn("created_at", {c["name"] for c in inspect(self.connection).get_columns("users")})
