@@ -1,3 +1,4 @@
+from routes import account_registration_routes
 from fastapi import FastAPI,Depends,APIRouter
 import os
 import uvicorn
@@ -81,6 +82,7 @@ api_router = APIRouter(prefix="/api")
 #  Public Routes that can have both public and protected routes
 api_router.include_router(auth_routes.router)
 api_router.include_router(registration_routes.router)
+api_router.include_router(account_registration_routes.router)
 api_router.include_router(document_routes.router)
 api_router.include_router(verification_routes.router)
 api_router.include_router(health_routes.router)
